@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 23
@@ -11,8 +12,17 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    signingConfigs {
+        release {
+            storeFile file("langeokey.keystore")
+            storePassword System.getenv("KSTOREPWD")
+            keyPassword System.getenv("KEYPWD")
+            keyAlias "langeokey"
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -20,6 +30,7 @@ android {
 }
 
 dependencies {
+    compile 'com.google.android.gms:play-services-auth:8.3.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'

@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "langeoapp",
+    "project_number": "814462762552",
+    "name": "Langeo"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814462762552:android:ac730febd538483f",
+        "client_id": "android:com.team.agita.langeo",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.team.agita.langeo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "814462762552-e30hbh2d4t6c45oh8sfn6l8ocp6i2gfm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.team.agita.langeo",
+            "certificate_hash": "F7D3A9047297AFD855F967DA36BABD228D616A2B"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
