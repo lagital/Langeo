@@ -18,7 +18,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.team.agita.langeo.R;
 
 /**
  * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
@@ -29,6 +28,7 @@ public class SigninActivity extends AppCompatActivity implements
         View.OnClickListener {
 
     private static final String TAG = "SignInActivity";
+    private static final String SLIDE_SHOW_START = "com.team.agita.langeo.RUN_SLIDE_SHOW";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
@@ -195,6 +195,15 @@ public class SigninActivity extends AppCompatActivity implements
         if (signedIn) {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+
+            //Code is not from sample. Go to the next activity after successful sign-in:
+            //TODO: condition check of the first run.
+            if (true){
+                Intent intent = new Intent (this, ScreenSlidePagerActivity.class);
+                intent.putExtra(SLIDE_SHOW_START, true);
+                startActivity(intent);
+            }
+
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
