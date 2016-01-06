@@ -6,7 +6,7 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.github.lagital.langeo.YourFirstAPI</param-value>
+            <param-value>com.github.lagital.langeo.LangeoAPI</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
