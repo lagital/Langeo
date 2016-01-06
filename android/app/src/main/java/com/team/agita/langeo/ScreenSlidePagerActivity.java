@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -33,6 +34,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
      * The number of pages (wizard steps) to show in this demo.
      */
     private static final int NUM_PAGES = 3;
+    private static final String START_STR = "ACTIVITY_START";
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -95,14 +97,24 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
             case R.id.action_previous:
                 // Go to the previous step in the wizard. If there is no previous step,
                 // setCurrentItem will do nothing.
+                Log.d("LOG", "NO" + mPager.getCurrentItem());
                 mPager.setCurrentItem(mPager.getCurrentItem() - 1);
                 return true;
 
             case R.id.action_next:
                 // Advance to the next step in the wizard. If there is no next step, setCurrentItem
                 // will do nothing.
-                mPager.setCurrentItem(mPager.getCurrentItem() + 1);
-                return true;
+                Log.d("LOG", "" + mPager.getCurrentItem());
+                if (mPager.getCurrentItem() + 1 == NUM_PAGES) {
+                    Intent intent = new Intent(this, MapActivity.class);
+                    intent.putExtra(START_STR, true);
+                    startActivity(intent);
+                    return true;
+                } else {
+                    Log.d("LOG", "NO" + mPager.getCurrentItem());
+                    mPager.setCurrentItem(mPager.getCurrentItem() + 1);
+                    return true;
+                }
         }
 
         return super.onOptionsItemSelected(item);
