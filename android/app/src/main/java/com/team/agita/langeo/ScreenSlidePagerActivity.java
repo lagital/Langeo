@@ -106,7 +106,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
                 // will do nothing.
                 Log.d("LOG", "" + mPager.getCurrentItem());
                 if (mPager.getCurrentItem() + 1 == NUM_PAGES) {
-                    Intent intent = new Intent(this, MapActivity.class);
+                    Intent intent = new Intent(this, MapsActivity.class);
                     intent.putExtra(START_STR, true);
                     startActivity(intent);
                     return true;

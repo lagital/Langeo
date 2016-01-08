@@ -16,11 +16,13 @@
 
 package com.team.agita.langeo;
 
+        import android.content.Intent;
         import android.os.Bundle;
         import android.support.v4.app.Fragment;
         import android.view.LayoutInflater;
         import android.view.View;
         import android.view.ViewGroup;
+        import android.widget.Button;
         import android.widget.TextView;
 
 /**
@@ -32,6 +34,8 @@ public class ScreenSlidePageFragment extends Fragment {
      * The argument key for the page number this fragment represents.
      */
     public static final String ARG_PAGE = "page";
+    private static final int NUM_PAGES = 3;
+    public static final String RUN_ACTIVITY = "RUN_ACTIVITY";
 
     /**
      * The fragment's page number, which is set to the argument value for {@link #ARG_PAGE}.
@@ -56,6 +60,7 @@ public class ScreenSlidePageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPageNumber = getArguments().getInt(ARG_PAGE);
+
     }
 
     @Override
@@ -68,6 +73,18 @@ public class ScreenSlidePageFragment extends Fragment {
         // Set the title view to show the page number.
         ((TextView) rootView.findViewById(R.id.text)).setText(
                 getString(R.string.title_template_step, mPageNumber + 1));
+        if (mPageNumber == NUM_PAGES - 1) {
+            Button finBtn = (Button) rootView.findViewById(R.id.finish_slide_show);
+            finBtn.setVisibility(View.VISIBLE);
+            finBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), MapsActivity.class);
+                    intent.putExtra(RUN_ACTIVITY, true);
+                    startActivity(intent);
+                }
+            });
+        }
 
         return rootView;
     }
