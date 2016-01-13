@@ -18,6 +18,7 @@ import java.io.IOException;
  */
 class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
     private static Langeo myApiService = null;
+    private static String LOG = "InitUserAsyncTask";
     private static String MY_PREFS_NAME = "LangeoPreferences";
     private static Boolean ERR = false;
     private Context mContext;
@@ -61,6 +62,7 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
             }
             if (user == null && !ERR) {
                 //new user
+                Log.d(LOG, "new user");
                 try {
                     myApiService.langeoAPI().putUser(userId, user).execute();
                 } catch (IOException e) {
@@ -81,6 +83,7 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
                 }
             } else if (user != null) {
                 //old user on new device
+                Log.d(LOG, "old user on new device");
                 LocalUser.getInstance().setId(user.getId());
                 LocalUser.getInstance().setShowSlides(false);
                 LocalUser.getInstance().setIsVisible(user.getIsVisible());
@@ -102,11 +105,13 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
             }
             if (userId.equals(login)) {
                 //standard Nth user login
+                Log.d(LOG, "standard Nth user login");
                 LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
                 LocalUser.getInstance().setId(prefs.getString("id", "idError"));
                 LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
             } else if (user != null && !user.getId().equals(login)) {
                 //re-login with a new user
+                Log.d(LOG, "re-login with a new user");
                 LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
                 LocalUser.getInstance().setId(prefs.getString("id", "idError"));
                 LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
@@ -125,6 +130,6 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
     @Override
     protected void onPostExecute(LocalUser lUser)
     {
-        Log.d("LOG", "InitUserAsyncTask");
+        Log.d(LOG, "finish");
     }
 }
