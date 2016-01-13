@@ -2,12 +2,14 @@ package com.team.agita.langeo;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.appspot.myapplicationid.langeo.model.User;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -30,6 +32,7 @@ public class SigninActivity extends AppCompatActivity implements
     private static final String TAG = "SignInActivity";
     private static final String SLIDE_SHOW_START = "com.team.agita.langeo.RUN_SLIDE_SHOW";
     private static final int RC_SIGN_IN = 9001;
+    private static final String MY_PREFS_NAME = "LangeoPreferences";
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
@@ -124,6 +127,8 @@ public class SigninActivity extends AppCompatActivity implements
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
+            LocalUser.getInstance().initialize(this, acct.getId());
+
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
             updateUI(true);
         } else {
@@ -195,18 +200,8 @@ public class SigninActivity extends AppCompatActivity implements
         if (signedIn) {
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-
-            //Code is not from sample. Go to the next activity after successful sign-in:
-            //TODO: condition check of the first run.
-            if (true){
-                Intent intent = new Intent (this, ScreenSlidePagerActivity.class);
-                intent.putExtra(SLIDE_SHOW_START, true);
-                startActivity(intent);
-            }
-
         } else {
             mStatusTextView.setText(R.string.signed_out);
-
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
