@@ -64,6 +64,9 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
                 //new user
                 Log.d(LOG, "new user");
                 try {
+                    user = new User();
+                    user.setId(userId);
+                    user.setIsVisible(true);
                     myApiService.langeoAPI().putUser(userId, user).execute();
                 } catch (IOException e) {
                     ERR = true;
@@ -78,7 +81,7 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
                             mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
                     editor.putString("id", user.getId());
                     editor.putBoolean("slideShow", true);
-                    editor.putBoolean("isVidsible", true);
+                    editor.putBoolean("isVisible", true);
                     editor.commit();
                 }
             } else if (user != null) {
@@ -92,7 +95,7 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
                 editor.putString("id", user.getId());
                 editor.putBoolean("slideShow", false);
-                editor.putBoolean("isVidsible", user.getIsVisible());
+                editor.putBoolean("isVisible", user.getIsVisible());
                 editor.commit();
             }
         } else {

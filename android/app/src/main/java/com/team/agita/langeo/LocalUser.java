@@ -7,6 +7,7 @@ import android.support.v4.util.Pair;
 import com.appspot.myapplicationid.langeo.Langeo;
 import com.appspot.myapplicationid.langeo.model.Coordinates;
 import com.appspot.myapplicationid.langeo.model.User;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -19,12 +20,13 @@ public class LocalUser{
     private static SharedPreferences prefs;
 
     public String id;
+    public String eMail;
     public Coordinates coordinates;
     public Boolean isVisible;
     public Pair<String, Integer>[] languages;
     public Boolean showSlides;
 
-    private static LocalUser user = new LocalUser( );
+    private static LocalUser user;
 
     /* A private Constructor prevents any other
      * class from instantiating.
@@ -33,12 +35,16 @@ public class LocalUser{
 
     /* Static 'instance' method */
     public static LocalUser getInstance( ) {
+        if (user == null) {
+            user = new LocalUser();
+        }
         return user;
     }
 
-    public void initialize(Context context, String id) {
+    public void initialize(Context context, GoogleSignInAccount acct) {
         InitUserAsyncTask task = new InitUserAsyncTask(context);
-        task.execute(id);
+        task.execute(acct.getId());
+        eMail = acct.getEmail();
     }
 
     public String getId() {
