@@ -130,7 +130,7 @@ public class SigninActivity extends AppCompatActivity implements
             LocalUser.getInstance().initialize(this, acct);
             Log.d(TAG, "Successfull login");
 
-            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+            //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
             updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
@@ -199,8 +199,17 @@ public class SigninActivity extends AppCompatActivity implements
 
     private void updateUI(boolean signedIn) {
         if (signedIn) {
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+
+            if (LocalUser.getInstance().getShowSlides()) {
+                Intent intent = new Intent(this,ScreenSlidePagerActivity.class);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this,MapsActivity.class);
+                startActivity(intent);
+            }
+
+            //findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.signed_out);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
