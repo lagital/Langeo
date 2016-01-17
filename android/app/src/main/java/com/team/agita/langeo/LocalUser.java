@@ -19,14 +19,15 @@ public class LocalUser{
     private static String MY_PREFS_NAME = "LangeoPreferences";
     private static SharedPreferences prefs;
 
-    public String id;
-    public String eMail;
+    public Integer initialized = 0;
+    public String id = "0";
+    public String eMail = "example@email.com";
     public Coordinates coordinates;
-    public Boolean isVisible;
+    public Boolean isVisible = true;
     public Pair<String, Integer>[] languages;
-    public Boolean showSlides;
+    public Boolean showSlides = true;
 
-    private static LocalUser user;
+    private static LocalUser user = null;
 
     /* A private Constructor prevents any other
      * class from instantiating.
@@ -86,4 +87,13 @@ public class LocalUser{
     public void setShowSlides(Boolean showSlides) {
         this.showSlides = showSlides;
     }
+
+    public Integer getInitialized() {
+        return initialized;
+    }
+
+    public void setInitialized(Integer initialized) {
+        this.initialized = initialized;
+    }
+
 }

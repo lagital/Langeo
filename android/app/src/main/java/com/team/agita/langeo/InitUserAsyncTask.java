@@ -2,6 +2,7 @@ package com.team.agita.langeo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -16,20 +17,19 @@ import java.io.IOException;
 /**
  * Created by agita on 09.01.16.
  */
-class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
+class InitUserAsyncTask extends AsyncTask<String, Void, Integer> {
     private static Langeo myApiService = null;
     private static String LOG = "InitUserAsyncTask";
     private static String MY_PREFS_NAME = "LangeoPreferences";
-    private static Boolean ERR = false;
     private Context mContext;
-    public LocalUser mUser = null;
+    public Integer mResult = 0;
 
     public InitUserAsyncTask (Context context){
         mContext = context;
     }
 
     @Override
-    protected LocalUser doInBackground(String... params) {
+    protected Integer doInBackground(String... params) {
         if (myApiService == null) {  // Only do this once
             //For local tests:
             Langeo.Builder builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
@@ -53,42 +53,19 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
         SharedPreferences prefs = mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
         String login = prefs.getString("id", "undefined");
         if (login.equals("undefined")) {
-            User user;
+            Log.d(LOG, "undefined login");
+            User user = null;
             try {
                 user = myApiService.langeoAPI().getUser(userId).execute();
             } catch (IOException e) {
-                ERR = true;
-                user = null;
+                Log.d(LOG, "IOException " + e.getMessage());
+                return 1;
             }
-            if (user == null && !ERR) {
-                //new user
-                Log.d(LOG, "new user");
-                try {
-                    user = new User();
-                    user.setId(userId);
-                    user.setIsVisible(true);
-                    myApiService.langeoAPI().putUser(userId, user).execute();
-                } catch (IOException e) {
-                    ERR = true;
-                }
-                if (!ERR) {
-                    // successful registration
-                    LocalUser.getInstance().setId(user.getId());
-                    LocalUser.getInstance().setShowSlides(true);
-                    LocalUser.getInstance().setIsVisible(true);
-
-                    SharedPreferences.Editor editor =
-                            mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                    editor.putString("id", user.getId());
-                    editor.putBoolean("slideShow", true);
-                    editor.putBoolean("isVisible", true);
-                    editor.commit();
-                }
-            } else if (user != null) {
+            if (user != null) {
                 //old user on new device
                 Log.d(LOG, "old user on new device");
-                LocalUser.getInstance().setId(user.getId());
                 LocalUser.getInstance().setShowSlides(false);
+                LocalUser.getInstance().setId(user.getId());
                 LocalUser.getInstance().setIsVisible(user.getIsVisible());
 
                 SharedPreferences.Editor editor =
@@ -97,27 +74,59 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
                 editor.putBoolean("slideShow", false);
                 editor.putBoolean("isVisible", user.getIsVisible());
                 editor.commit();
+
+                return 0;
+            } else {
+                //new user
+                Log.d(LOG, "new user");
+                try {
+                    user = new User();
+                    user.setId(userId);
+                    user.setIsVisible(true);
+                    myApiService.langeoAPI().putUser(userId, user).execute();
+                } catch (IOException e) {
+                    Log.d(LOG, "IOException " + e.getMessage());
+                    return 2;
+                }
+                // successful registration
+                Log.d(LOG, "successful registration");
+                LocalUser.getInstance().setShowSlides(true);
+                LocalUser.getInstance().setId(user.getId());
+                LocalUser.getInstance().setIsVisible(true);
+
+                SharedPreferences.Editor editor =
+                        mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
+                editor.putBoolean("slideShow", true);
+                editor.putString("id", user.getId());
+                editor.putBoolean("isVisible", true);
+                editor.commit();
+
+                return 0;
             }
         } else {
-            User user;
-            try {
-                user = myApiService.langeoAPI().getUser(userId).execute();
-            } catch (IOException e) {
-                ERR = true;
-                user = null;
-            }
+            Log.d(LOG,"Some login is stored on device!");
             if (userId.equals(login)) {
                 //standard Nth user login
+                LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
+                LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
+                LocalUser.getInstance().setId(prefs.getString("id", "idError"));
                 Log.d(LOG, "standard Nth user login");
-                LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
-                LocalUser.getInstance().setId(prefs.getString("id", "idError"));
-                LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
-            } else if (user != null && !user.getId().equals(login)) {
+
+                return 0;
+            } else {
                 //re-login with a new user
-                Log.d(LOG, "re-login with a new user");
+                User user;
+                try {
+                    user = myApiService.langeoAPI().getUser(userId).execute();
+                } catch (IOException e) {
+                    Log.d(LOG, "IOException " + e.getMessage());
+                    return 1;
+                }
+
+                LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
                 LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
                 LocalUser.getInstance().setId(prefs.getString("id", "idError"));
-                LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
+                Log.d(LOG, "re-login with a new user");
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
@@ -125,14 +134,16 @@ class InitUserAsyncTask extends AsyncTask<String, Void, LocalUser> {
                 editor.putBoolean("slideShow", false);
                 editor.putBoolean("isVisible", user.getIsVisible());
                 editor.commit();
+
+                return 0;
             }
         }
-        return LocalUser.getInstance();
     }
 
     @Override
-    protected void onPostExecute(LocalUser lUser)
+    protected void onPostExecute(Integer result)
     {
+        LocalUser.getInstance().setInitialized(result);
         Log.d(LOG, "finish");
     }
 }

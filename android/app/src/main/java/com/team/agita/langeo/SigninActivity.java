@@ -1,5 +1,6 @@
 package com.team.agita.langeo;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appspot.myapplicationid.langeo.model.User;
 import com.google.android.gms.auth.api.Auth;
@@ -199,17 +201,32 @@ public class SigninActivity extends AppCompatActivity implements
 
     private void updateUI(boolean signedIn) {
         if (signedIn) {
-
-            if (LocalUser.getInstance().getShowSlides()) {
-                Intent intent = new Intent(this,ScreenSlidePagerActivity.class);
-                startActivity(intent);
-            } else {
-                Intent intent = new Intent(this,MapsActivity.class);
-                startActivity(intent);
+            switch (LocalUser.getInstance().getInitialized()) {
+                case 0:
+                if (LocalUser.getInstance().getShowSlides()) {
+                    Intent intent = new Intent(this, ScreenSlidePagerActivity.class);
+                    intent.putExtra("ACTIVITY_MAIN", true);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(this, MapsActivity.class);
+                    intent.putExtra("ACTIVITY_MAIN", true);
+                    startActivity(intent);
+                }
+                    break;
+                case 1:
+                    findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+                    findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    Toast.makeText(this, R.string.server_unavailable, Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+                    findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    Toast.makeText(this, R.string.server_error_new_user, Toast.LENGTH_SHORT).show();
+                case 3:
+                    findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+                    findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    Toast.makeText(this, R.string.server_error_unknown, Toast.LENGTH_SHORT).show();
             }
-
-            //findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.signed_out);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);

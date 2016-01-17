@@ -34,6 +34,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
      * The number of pages (wizard steps) to show in this demo.
      */
     private static final int NUM_PAGES = 3;
+    private static final String LOG = "SlideShowActivity";
     private static final String START_STR = "ACTIVITY_START";
 
     /**
@@ -51,6 +52,10 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_screen_slide);
+
+        Intent intent = getIntent();
+
+        Log.d(LOG, "onCreate");
 
         // Instantiate a ViewPager and a PagerAdapter.
         mPager = (ViewPager) findViewById(R.id.pager);

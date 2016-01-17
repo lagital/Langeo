@@ -1,5 +1,5 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
-    <string name="app_name">Sign-In Quickstart</string>
+    <string name="app_name">Langeo</string>
     <string name="title_text">Google Sign-In\nQuickstart</string>
 
     <!-- Sign-in status messages -->
@@ -16,6 +16,9 @@
     <string name="loading">Loading…</string>
     <string name="auth_code_fmt">Auth Code: %s</string>
     <string name="id_token_fmt">ID Token: %s</string>
+    <string name="server_unavailable">Server unavailable</string>
+    <string name="server_error_new_user">Failed creating new user</string>
+    <string name="server_error_unknown">Unknown error</string>
 
     <!-- Google Play Services error for Toast -->
     <string name="play_services_error_fmt">Google Play Services Error: %i</string>
@@ -35,6 +38,12 @@
 
     <!-- Content Description for images -->
     <string name="desc_google_icon">Google Logo</string>
+
+    <!-- Toolbar -->
+    <string name="toolbar_profile">Profile</string>
+    <string name="toolbar_achievements">Achievements</string>
+    <string name="toolbar_contacts">Contacts</string>
+    <string name="toolbar_signout">Sign Out</string>
 
     <!-- Rationale for asking for Contacts -->
     <string name="contacts_permission_rationale">Contacts access is needed in order to retrieve your email address.</string>
