@@ -20,6 +20,9 @@
     <string name="server_error_new_user">Failed creating new user</string>
     <string name="server_error_unknown">Unknown error</string>
 
+    <!-- Map status messages -->
+    <string name="curr_location_perm_denied">App does not have permissions for locating you!</string>
+
     <!-- Google Play Services error for Toast -->
     <string name="play_services_error_fmt">Google Play Services Error: %i</string>
 

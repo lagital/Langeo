@@ -4,13 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.util.Pair;
 
-import com.appspot.myapplicationid.langeo.Langeo;
 import com.appspot.myapplicationid.langeo.model.Coordinates;
-import com.appspot.myapplicationid.langeo.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-
-import java.util.ArrayList;
-import java.util.TreeMap;
 
 /**
  * Created by agita on 12.01.16.
@@ -43,7 +38,7 @@ public class LocalUser{
     }
 
     public void initialize(Context context, GoogleSignInAccount acct) {
-        InitUserAsyncTask task = new InitUserAsyncTask(context);
+        AsyncTaskInitUser task = new AsyncTaskInitUser(context);
         task.execute(acct.getId());
         eMail = acct.getEmail();
     }

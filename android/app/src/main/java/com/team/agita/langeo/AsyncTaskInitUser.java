@@ -17,14 +17,14 @@ import java.io.IOException;
 /**
  * Created by agita on 09.01.16.
  */
-class InitUserAsyncTask extends AsyncTask<String, Void, Integer> {
+class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
     private static Langeo myApiService = null;
-    private static String LOG = "InitUserAsyncTask";
+    private static String LOG = "AsyncTaskInitUser";
     private static String MY_PREFS_NAME = "LangeoPreferences";
     private Context mContext;
     public Integer mResult = 0;
 
-    public InitUserAsyncTask (Context context){
+    public AsyncTaskInitUser(Context context){
         mContext = context;
     }
 

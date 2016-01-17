@@ -29,7 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class ScreenSlidePagerActivity extends FragmentActivity {
+public class ActivitySlideShow extends FragmentActivity {
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
@@ -96,7 +96,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
             case android.R.id.home:
                 // Navigate "up" the demo structure to the launchpad activity.
                 // See http://developer.android.com/design/patterns/navigation.html for more.
-                NavUtils.navigateUpTo(this, new Intent(this, SigninActivity.class));
+                NavUtils.navigateUpTo(this, new Intent(this, ActivitySignin.class));
                 return true;
 
             case R.id.action_previous:
@@ -111,7 +111,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
                 // will do nothing.
                 Log.d("LOG", "" + mPager.getCurrentItem());
                 if (mPager.getCurrentItem() + 1 == NUM_PAGES) {
-                    Intent intent = new Intent(this, MapsActivity.class);
+                    Intent intent = new Intent(this, ActivityMaps.class);
                     intent.putExtra(START_STR, true);
                     startActivity(intent);
                     return true;
@@ -126,7 +126,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
     }
 
     /**
-     * A simple pager adapter that represents 5 {@link ScreenSlidePageFragment} objects, in
+     * A simple pager adapter that represents 5 {@link FragmentSlideShow} objects, in
      * sequence.
      */
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
@@ -136,7 +136,7 @@ public class ScreenSlidePagerActivity extends FragmentActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return ScreenSlidePageFragment.create(position);
+            return FragmentSlideShow.create(position);
         }
 
         @Override

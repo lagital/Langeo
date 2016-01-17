@@ -1,9 +1,7 @@
 package com.team.agita.langeo;
 
-import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,7 +9,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.appspot.myapplicationid.langeo.model.User;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -27,7 +24,7 @@ import com.google.android.gms.common.api.Status;
  * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
  * profile.
  */
-public class SigninActivity extends AppCompatActivity implements
+public class ActivitySignin extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
@@ -204,11 +201,11 @@ public class SigninActivity extends AppCompatActivity implements
             switch (LocalUser.getInstance().getInitialized()) {
                 case 0:
                 if (LocalUser.getInstance().getShowSlides()) {
-                    Intent intent = new Intent(this, ScreenSlidePagerActivity.class);
+                    Intent intent = new Intent(this, ActivitySlideShow.class);
                     intent.putExtra("ACTIVITY_MAIN", true);
                     startActivity(intent);
                 } else {
-                    Intent intent = new Intent(this, MapsActivity.class);
+                    Intent intent = new Intent(this, ActivityMaps.class);
                     intent.putExtra("ACTIVITY_MAIN", true);
                     startActivity(intent);
                 }

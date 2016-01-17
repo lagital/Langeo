@@ -29,7 +29,7 @@ package com.team.agita.langeo;
  * A fragment representing a single step in a wizard. The fragment shows a dummy title indicating
  * the page number, along with some dummy text.
  */
-public class ScreenSlidePageFragment extends Fragment {
+public class FragmentSlideShow extends Fragment {
     /**
      * The argument key for the page number this fragment represents.
      */
@@ -45,15 +45,15 @@ public class ScreenSlidePageFragment extends Fragment {
     /**
      * Factory method for this fragment class. Constructs a new fragment for the given page number.
      */
-    public static ScreenSlidePageFragment create(int pageNumber) {
-        ScreenSlidePageFragment fragment = new ScreenSlidePageFragment();
+    public static FragmentSlideShow create(int pageNumber) {
+        FragmentSlideShow fragment = new FragmentSlideShow();
         Bundle args = new Bundle();
         args.putInt(ARG_PAGE, pageNumber);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public ScreenSlidePageFragment() {
+    public FragmentSlideShow() {
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ScreenSlidePageFragment extends Fragment {
             finBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), MapsActivity.class);
+                    Intent intent = new Intent(getActivity(), ActivityMaps.class);
                     intent.putExtra(RUN_ACTIVITY, true);
                     startActivity(intent);
                 }
