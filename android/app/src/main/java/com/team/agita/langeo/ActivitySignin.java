@@ -30,12 +30,14 @@ public class ActivitySignin extends AppCompatActivity implements
 
     private static final String TAG = "SignInActivity";
     private static final String SLIDE_SHOW_START = "com.team.agita.langeo.RUN_SLIDE_SHOW";
+    private static final String MAP_START = "com.team.agita.langeo.RUN_MAP";
     private static final int RC_SIGN_IN = 9001;
-    private static final String MY_PREFS_NAME = "LangeoPreferences";
+    private static final String SIGNIN_START = "com.team.agita.langeo.RUN_SIGNIN";
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
+    private Boolean mNoSilentLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,12 @@ public class ActivitySignin extends AppCompatActivity implements
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.disconnect_button).setOnClickListener(this);
+        findViewById(R.id.go_to_app).setOnClickListener(this);
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(SIGNIN_START)){
+            mNoSilentLogin = true;
+        }
 
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
@@ -126,10 +133,12 @@ public class ActivitySignin extends AppCompatActivity implements
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
-            LocalUser.getInstance().initialize(this, acct);
+            if (!mNoSilentLogin) {
+                LocalUser.getInstance().initialize(this, acct);
+            }
             Log.d(TAG, "Successfull login");
 
-            //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
             updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
@@ -200,28 +209,34 @@ public class ActivitySignin extends AppCompatActivity implements
         if (signedIn) {
             switch (LocalUser.getInstance().getInitialized()) {
                 case 0:
-                if (LocalUser.getInstance().getShowSlides()) {
-                    Intent intent = new Intent(this, ActivitySlideShow.class);
-                    intent.putExtra("ACTIVITY_MAIN", true);
-                    startActivity(intent);
-                } else {
-                    Intent intent = new Intent(this, ActivityMaps.class);
-                    intent.putExtra("ACTIVITY_MAIN", true);
-                    startActivity(intent);
-                }
+                    if (mNoSilentLogin) {
+                        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+                        findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    } else if (LocalUser.getInstance().getShowSlides()) {
+                        Intent intent = new Intent(this, ActivitySlideShow.class);
+                        intent.putExtra(SLIDE_SHOW_START, true);
+                        startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(this, ActivityMaps.class);
+                        intent.putExtra(MAP_START, true);
+                        startActivity(intent);
+                    }
                     break;
                 case 1:
                     findViewById(R.id.sign_in_button).setVisibility(View.GONE);
                     findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    findViewById(R.id.go_to_app).setVisibility(View.GONE);
                     Toast.makeText(this, R.string.server_unavailable, Toast.LENGTH_SHORT).show();
                     break;
                 case 2:
                     findViewById(R.id.sign_in_button).setVisibility(View.GONE);
                     findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    findViewById(R.id.go_to_app).setVisibility(View.GONE);
                     Toast.makeText(this, R.string.server_error_new_user, Toast.LENGTH_SHORT).show();
                 case 3:
                     findViewById(R.id.sign_in_button).setVisibility(View.GONE);
                     findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+                    findViewById(R.id.go_to_app).setVisibility(View.GONE);
                     Toast.makeText(this, R.string.server_error_unknown, Toast.LENGTH_SHORT).show();
             }
         } else {
@@ -240,8 +255,9 @@ public class ActivitySignin extends AppCompatActivity implements
             case R.id.sign_out_button:
                 signOut();
                 break;
-            case R.id.disconnect_button:
-                revokeAccess();
+            case R.id.go_to_app:
+                mNoSilentLogin = false;
+                updateUI(true);
                 break;
         }
     }

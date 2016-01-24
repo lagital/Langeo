@@ -25,6 +25,8 @@ package com.team.agita.langeo;
         import android.widget.Button;
         import android.widget.TextView;
 
+        import org.w3c.dom.Text;
+
 /**
  * A fragment representing a single step in a wizard. The fragment shows a dummy title indicating
  * the page number, along with some dummy text.
@@ -71,21 +73,8 @@ public class FragmentSlideShow extends Fragment {
                 .inflate(R.layout.fragment_screen_slide_page, container, false);
 
         // Set the title view to show the page number.
-        ((TextView) rootView.findViewById(R.id.text)).setText(
-                getString(R.string.title_template_step, mPageNumber + 1));
-        if (mPageNumber == NUM_PAGES - 1) {
-            Button finBtn = (Button) rootView.findViewById(R.id.finish_slide_show);
-            finBtn.setVisibility(View.VISIBLE);
-            finBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), ActivityMaps.class);
-                    intent.putExtra(RUN_ACTIVITY, true);
-                    startActivity(intent);
-                }
-            });
-        }
-
+        TextView text = (TextView) rootView.findViewById(R.id.text);
+        text.setText(getString(R.string.title_template_step) + " " + Integer.toString(mPageNumber));
         return rootView;
     }
 

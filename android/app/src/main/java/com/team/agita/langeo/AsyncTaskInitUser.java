@@ -18,9 +18,19 @@ import java.io.IOException;
  * Created by agita on 09.01.16.
  */
 class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
+    private static final String LOG = "AsyncTaskInitUser";
+    private static final String MY_PREFS_NAME = "LangeoPreferences";
+    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
+
+    // Shared Preferences names
+    private static final String SP_UNDEFINED = "undefined";
+    private static final String SP_ID = "id";
+    private static final String SP_SLIDESHOW = "slideShow";
+    private static final String SP_IS_VISIBLE = "isVisible";
+    private static final String SP_ID_ERROR = "isVisible";
+
+
     private static Langeo myApiService = null;
-    private static String LOG = "AsyncTaskInitUser";
-    private static String MY_PREFS_NAME = "LangeoPreferences";
     private Context mContext;
     public Integer mResult = 0;
 
@@ -34,7 +44,7 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
             //For local tests:
             Langeo.Builder builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null)
-                    .setRootUrl("http://192.168.100.9:8080/_ah/api")
+                    .setRootUrl(LOCAL_ADDRESS)
                     .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                         @Override
                         public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -51,8 +61,8 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
 
         String userId = params[0];
         SharedPreferences prefs = mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
-        String login = prefs.getString("id", "undefined");
-        if (login.equals("undefined")) {
+        String login = prefs.getString(SP_ID, SP_UNDEFINED);
+        if (login.equals(SP_UNDEFINED)) {
             Log.d(LOG, "undefined login");
             User user = null;
             try {
@@ -70,9 +80,9 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putString("id", user.getId());
-                editor.putBoolean("slideShow", false);
-                editor.putBoolean("isVisible", user.getIsVisible());
+                editor.putString(SP_ID, user.getId());
+                editor.putBoolean(SP_SLIDESHOW, false);
+                editor.putBoolean(SP_IS_VISIBLE, user.getIsVisible());
                 editor.commit();
 
                 return 0;
@@ -97,8 +107,8 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
                 editor.putBoolean("slideShow", true);
-                editor.putString("id", user.getId());
-                editor.putBoolean("isVisible", true);
+                editor.putString(SP_ID, user.getId());
+                editor.putBoolean(SP_IS_VISIBLE, true);
                 editor.commit();
 
                 return 0;
@@ -107,9 +117,9 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
             Log.d(LOG,"Some login is stored on device!");
             if (userId.equals(login)) {
                 //standard Nth user login
-                LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
-                LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
-                LocalUser.getInstance().setId(prefs.getString("id", "idError"));
+                LocalUser.getInstance().setShowSlides(prefs.getBoolean(SP_SLIDESHOW, false));
+                LocalUser.getInstance().setIsVisible(prefs.getBoolean(SP_IS_VISIBLE, true));
+                LocalUser.getInstance().setId(prefs.getString(SP_ID, SP_ID_ERROR));
                 Log.d(LOG, "standard Nth user login");
 
                 return 0;
@@ -123,16 +133,16 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                     return 1;
                 }
 
-                LocalUser.getInstance().setShowSlides(prefs.getBoolean("slideShow", false));
-                LocalUser.getInstance().setIsVisible(prefs.getBoolean("isVisible", true));
-                LocalUser.getInstance().setId(prefs.getString("id", "idError"));
+                LocalUser.getInstance().setShowSlides(prefs.getBoolean(SP_SLIDESHOW, false));
+                LocalUser.getInstance().setIsVisible(prefs.getBoolean(SP_IS_VISIBLE, true));
+                LocalUser.getInstance().setId(prefs.getString(SP_ID, "idError"));
                 Log.d(LOG, "re-login with a new user");
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putString("id", user.getId());
-                editor.putBoolean("slideShow", false);
-                editor.putBoolean("isVisible", user.getIsVisible());
+                editor.putString(SP_ID, user.getId());
+                editor.putBoolean(SP_SLIDESHOW, false);
+                editor.putBoolean(SP_IS_VISIBLE, user.getIsVisible());
                 editor.commit();
 
                 return 0;

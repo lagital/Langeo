@@ -91,11 +91,11 @@
                 android:theme="@style/ThemeOverlay.MyDarkButton" />
 
             <Button
-                android:id="@+id/disconnect_button"
+                android:id="@+id/go_to_app"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/disconnect"
+                android:text="@string/go_to_app"
                 android:theme="@style/ThemeOverlay.MyDarkButton" />
         </LinearLayout>
 

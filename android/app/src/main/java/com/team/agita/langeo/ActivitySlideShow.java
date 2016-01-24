@@ -25,17 +25,20 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class ActivitySlideShow extends FragmentActivity {
+public class ActivitySlideShow extends AppCompatActivity {
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
     private static final int NUM_PAGES = 3;
     private static final String LOG = "SlideShowActivity";
-    private static final String START_STR = "ACTIVITY_START";
+    private static final String MAP_START = "com.team.agita.langeo.RUN_MAP";
+    private static final String SIGNIN_START = "com.team.agita.langeo.RUN_SIGNIN";
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -56,6 +59,9 @@ public class ActivitySlideShow extends FragmentActivity {
         Intent intent = getIntent();
 
         Log.d(LOG, "onCreate");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         // Instantiate a ViewPager and a PagerAdapter.
         mPager = (ViewPager) findViewById(R.id.pager);
@@ -78,7 +84,7 @@ public class ActivitySlideShow extends FragmentActivity {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity_screen_slide, menu);
 
-        menu.findItem(R.id.action_previous).setEnabled(mPager.getCurrentItem() > 0);
+        menu.findItem(R.id.action_previous).setEnabled(mPager.getCurrentItem() >= 0);
 
         // Add either a "next" or "finish" button to the action bar, depending on which page
         // is currently selected.
@@ -98,25 +104,32 @@ public class ActivitySlideShow extends FragmentActivity {
                 // See http://developer.android.com/design/patterns/navigation.html for more.
                 NavUtils.navigateUpTo(this, new Intent(this, ActivitySignin.class));
                 return true;
-
             case R.id.action_previous:
+                // Go to signin step.
+                if (mPager.getCurrentItem() == 0){
+                    Intent intent = new Intent(this, ActivitySignin.class);
+                    intent.putExtra(SIGNIN_START, true);
+                    startActivity(intent);
+                    return true;
+                }
                 // Go to the previous step in the wizard. If there is no previous step,
                 // setCurrentItem will do nothing.
-                Log.d("LOG", "NO" + mPager.getCurrentItem());
+                Log.d(LOG, "NO" + mPager.getCurrentItem());
                 mPager.setCurrentItem(mPager.getCurrentItem() - 1);
                 return true;
-
             case R.id.action_next:
                 // Advance to the next step in the wizard. If there is no next step, setCurrentItem
                 // will do nothing.
-                Log.d("LOG", "" + mPager.getCurrentItem());
-                if (mPager.getCurrentItem() + 1 == NUM_PAGES) {
+                Log.d(LOG, "" + mPager.getCurrentItem());
+                if (mPager.getCurrentItem() == mPagerAdapter.getCount() - 1) {
+                    LocalUser.getInstance().setShowSlides(false);
+                    LocalUser.updateStorages(this);
                     Intent intent = new Intent(this, ActivityMaps.class);
-                    intent.putExtra(START_STR, true);
+                    intent.putExtra(MAP_START, true);
                     startActivity(intent);
                     return true;
                 } else {
-                    Log.d("LOG", "NO" + mPager.getCurrentItem());
+                    Log.d(LOG, "NO" + mPager.getCurrentItem());
                     mPager.setCurrentItem(mPager.getCurrentItem() + 1);
                     return true;
                 }

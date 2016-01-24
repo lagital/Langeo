@@ -29,15 +29,12 @@
     <!-- Button labels -->
     <string name="sign_out">Sign Out</string>
     <string name="disconnect">Disconnect</string>
+    <string name="go_to_app">Go!</string>
 
     <string name="action_previous">Previous</string>
     <string name="action_next">Next</string>
     <string name="action_finish">Finish</string>
-    <string name="title_template_step">
-        Step
-        <xliff:g id="step_number">%1$d</xliff:g>
-        : lorem_ipsum
-    </string>
+    <string name="title_template_step">TIP #</string>
 
     <!-- Content Description for images -->
     <string name="desc_google_icon">Google Logo</string>
@@ -50,6 +47,10 @@
 
     <!-- Rationale for asking for Contacts -->
     <string name="contacts_permission_rationale">Contacts access is needed in order to retrieve your email address.</string>
+
+    <!-- Slide show -->
+    <string name="return_to_login">To Log-in</string>
+    <string name="finish_slide_show">Finish</string>
 
     <!-- Activity Names and Descriptions -->
     <string name="name_sign_in_activity">SignInActivity</string>
