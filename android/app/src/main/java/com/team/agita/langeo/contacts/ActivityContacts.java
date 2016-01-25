@@ -1,4 +1,4 @@
-package com.team.agita.langeo;
+package com.team.agita.langeo.contacts;
 
 /**
  * Created by agita on 18.01.16.

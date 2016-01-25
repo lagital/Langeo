@@ -1,4 +1,4 @@
-package com.team.agita.langeo;
+package com.team.agita.langeo.achievements;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,6 +7,10 @@ import android.view.ViewGroup;
 
 import com.bignerdranch.expandablerecyclerview.Adapter.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.Model.ParentListItem;
+import com.team.agita.langeo.R;
+import com.team.agita.langeo.achievements.Achievement;
+import com.team.agita.langeo.achievements.ViewHolderAchievementsMain;
+import com.team.agita.langeo.achievements.ViewHolderAchievementsSub;
 
 import java.util.List;
 

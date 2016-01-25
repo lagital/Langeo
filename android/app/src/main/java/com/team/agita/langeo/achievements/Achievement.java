@@ -1,9 +1,9 @@
-package com.team.agita.langeo;
+package com.team.agita.langeo.achievements;
 
 import com.bignerdranch.expandablerecyclerview.Model.ParentListItem;
+import com.team.agita.langeo.LocalUser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

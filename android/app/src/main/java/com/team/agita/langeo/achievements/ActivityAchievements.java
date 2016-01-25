@@ -1,26 +1,26 @@
-package com.team.agita.langeo;
+package com.team.agita.langeo.achievements;
 
 /**
  * Created by agita on 18.01.16.
  */
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageButton;
 
 import com.bignerdranch.expandablerecyclerview.Adapter.ExpandableRecyclerAdapter;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.team.agita.langeo.contacts.ActivityContacts;
+import com.team.agita.langeo.ActivityProfile;
+import com.team.agita.langeo.ActivitySignin;
+import com.team.agita.langeo.LocalUser;
+import com.team.agita.langeo.R;
 
 public class ActivityAchievements extends AppCompatActivity implements ExpandableRecyclerAdapter.ExpandCollapseListener {
 
@@ -46,6 +46,7 @@ public class ActivityAchievements extends AppCompatActivity implements Expandabl
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Create a new adapter with 20 test data items
         mExpandableAdapter = new ExpandableAdapterAchievements(this,
@@ -71,6 +72,9 @@ public class ActivityAchievements extends AppCompatActivity implements Expandabl
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
             case R.id.action_achievements:
                 // Go to achievements.
                 Intent aintent = new Intent(this, ActivityAchievements.class);

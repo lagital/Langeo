@@ -1,4 +1,4 @@
-package com.team.agita.langeo;
+package com.team.agita.langeo.achievements;
 
 import android.os.Build;
 import android.view.View;
@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bignerdranch.expandablerecyclerview.ViewHolder.ParentViewHolder;
+import com.team.agita.langeo.R;
 
 /**
  * Created by agita on 24.01.16.

@@ -5,6 +5,7 @@ import android.location.Location;
 import com.google.android.gms.location.LocationListener;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -27,11 +28,14 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.team.agita.langeo.achievements.ActivityAchievements;
+import com.team.agita.langeo.contacts.ActivityContacts;
 
 import java.text.DateFormat;
 import java.util.Date;
 
 public class ActivityMaps extends AppCompatActivity implements
+        GoogleMap.OnInfoWindowClickListener,
         LocationListener, OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
@@ -77,7 +81,7 @@ public class ActivityMaps extends AppCompatActivity implements
     //Represents a geographical location.
     protected Location mCurrentLocation;
 
-    // Labels.
+    // Labels.1
     protected String mLatitudeLabel;
     protected String mLongitudeLabel;
     protected String mLastUpdateTimeLabel;
@@ -108,9 +112,11 @@ public class ActivityMaps extends AppCompatActivity implements
                 if (!mRequestingLocationUpdates) {
                     startLocationUpdates();
                     mRequestingLocationUpdates = true;
+                    mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_enabled));
                 } else {
                     stopLocationUpdates();
                     mRequestingLocationUpdates = false;
+                    mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_disabled));
                 }
             }
         });
@@ -137,9 +143,17 @@ public class ActivityMaps extends AppCompatActivity implements
     public void onMapReady(GoogleMap map) {
         // Add a marker on current location, and move the camera
         mMap = map;
+        mMap.setOnInfoWindowClickListener(this);
         mMarkerMe = map.addMarker(new MarkerOptions().position(new LatLng(0.0, 0.0))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                 .visible(true));
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        //TODO: normal action on click
+        Toast.makeText(this, "Info window clicked",
+                Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -270,6 +284,7 @@ public class ActivityMaps extends AppCompatActivity implements
         // location updates if the user has requested them.
 
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
+            mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_enabled));
             startLocationUpdates();
         }
     }

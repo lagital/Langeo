@@ -1,6 +1,8 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">Langeo</string>
-    <string name="title_text">Google Sign-In\nQuickstart</string>
+    <string name="achievements_act_name">Achievements</string>
+    <string name="contacts_act_name">Contacts</string>
+    <string name="profile_act_name">Profile</string>
 
     <!-- Sign-in status messages -->
     <string name="signed_in_fmt">Signed in as: %s</string>

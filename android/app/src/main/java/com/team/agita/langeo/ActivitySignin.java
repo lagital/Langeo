@@ -149,6 +149,7 @@ public class ActivitySignin extends AppCompatActivity implements
 
     // [START signIn]
     private void signIn() {
+        mNoSilentLogin = false;
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
