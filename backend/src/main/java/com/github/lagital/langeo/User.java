@@ -8,4 +8,6 @@ public class User {
     @Id public String id;
     public Coordinates coordinates;
     public Boolean isVisible;
+    public Achievement[] achievements;
+    public UserType userType;
 }
