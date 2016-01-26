@@ -10,4 +10,6 @@ public class User {
     public Boolean isVisible;
     public Achievement[] achievements;
     public UserType userType;
+    public Boolean isOnline;
+    public String cityId;
 }
