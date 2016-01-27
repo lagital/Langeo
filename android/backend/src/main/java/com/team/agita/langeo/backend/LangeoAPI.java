@@ -45,7 +45,7 @@ public class LangeoAPI {
 //            langeoUser = new User();
 //            langeoUser.id = id;
         }
-        langeoUser.lastRequestTime = DateTime.now();
+//        langeoUser.lastRequestTime = DateTime.now();
         ofy().save().entity(langeoUser).now();
         return langeoUser;
     }
@@ -59,7 +59,7 @@ public class LangeoAPI {
             throw new ForbiddenException(format("You (%s) are trying to change information about other user (%s)", user.getEmail(), email));
         }
         langeoUser.id = email;
-        langeoUser.lastRequestTime = DateTime.now();
+//        langeoUser.lastRequestTime = DateTime.now();
         ofy().save().entity(langeoUser).now();
     }
 
@@ -75,7 +75,7 @@ public class LangeoAPI {
                 .id(user.getEmail())
                 .now();
         if (langeoUser != null) {
-            langeoUser.lastRequestTime = DateTime.now();
+//            langeoUser.lastRequestTime = DateTime.now();
             ofy().save().entity(langeoUser).now();
         }
         return ofy().load()
