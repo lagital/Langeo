@@ -1,25 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- "Mark Favorite", should appear as action button if possible -->
+    <!-- Should appear as action button if possible -->
     <item
         android:id="@+id/action_profile"
         android:icon="@drawable/toolbar_profile"
         android:title="@string/toolbar_profile"
-        app:showAsAction="always"/>
-
-    <!-- "Mark Favorite", should appear as action button if possible -->
-    <item
-        android:id="@+id/action_achievements"
-        android:icon="@drawable/achievements_toolbar"
-        android:title="@string/toolbar_achievements"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_contacts"
         android:icon="@drawable/contacts_toolbar"
         android:title="@string/toolbar_contacts"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_achievements"
+        android:icon="@drawable/achievements_toolbar"
+        android:title="@string/toolbar_achievements"
+        app:showAsAction="ifRoom"/>
 
     <!-- Settings, should always be in the overflow -->
     <item android:id="@+id/action_signout"

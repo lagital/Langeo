@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 
-group = 'com.appspot.myapplicationid'
+group = 'com.appspot.id.app'
 archivesBaseName = 'langeo'
 version = 'v1-1.21.0-SNAPSHOT'
 

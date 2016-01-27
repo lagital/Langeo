@@ -1,6 +1,6 @@
 {
  "kind": "discovery#restDescription",
- "etag": "\"u_zXkMELIlX4ktyNbM2XKD4vK8E/6Qxi47tmrt4IG6MXyHcqqLJbo9U\"",
+ "etag": "\"u_zXkMELIlX4ktyNbM2XKD4vK8E/PJ5L3IHUh47HWCyc4Xfj1xcmP5U\"",
  "discoveryVersion": "v1",
  "id": "langeo:v1",
  "name": "langeo",
@@ -11,10 +11,10 @@
   "x32": "http://www.google.com/images/icons/product/search-32.gif"
  },
  "protocol": "rest",
- "baseUrl": "https://myApplicationId.appspot.com/_ah/api/langeo/v1/users/",
- "basePath": "/_ah/api/langeo/v1/users/",
- "rootUrl": "https://myApplicationId.appspot.com/_ah/api/",
- "servicePath": "langeo/v1/users/",
+ "baseUrl": "https://${app.id}.appspot.com/_ah/api/langeo/v1/",
+ "basePath": "/_ah/api/langeo/v1/",
+ "rootUrl": "https://${app.id}.appspot.com/_ah/api/",
+ "servicePath": "langeo/v1/",
  "batchPath": "batch",
  "parameters": {
   "alt": {
@@ -71,6 +71,16 @@
   }
  },
  "schemas": {
+  "Achievement": {
+   "id": "Achievement",
+   "type": "string",
+   "enum": [
+    "TEST_ACHIEVEMENT"
+   ],
+   "enumDescriptions": [
+    ""
+   ]
+  },
   "Coordinates": {
    "id": "Coordinates",
    "type": "object",
@@ -89,6 +99,15 @@
    "id": "User",
    "type": "object",
    "properties": {
+    "achievements": {
+     "type": "array",
+     "items": {
+      "$ref": "Achievement"
+     }
+    },
+    "cityId": {
+     "type": "string"
+    },
     "coordinates": {
      "$ref": "Coordinates"
     },
@@ -97,16 +116,66 @@
     },
     "isVisible": {
      "type": "boolean"
+    },
+    "userType": {
+     "$ref": "UserType"
     }
    }
+  },
+  "UserCollection": {
+   "id": "UserCollection",
+   "type": "object",
+   "properties": {
+    "items": {
+     "type": "array",
+     "items": {
+      "$ref": "User"
+     }
+    }
+   }
+  },
+  "UserType": {
+   "id": "UserType",
+   "type": "string",
+   "enum": [
+    "LANGUAGE_SCHOOL",
+    "STANDARD",
+    "TEACHER"
+   ],
+   "enumDescriptions": [
+    "",
+    "",
+    ""
+   ]
   }
  },
  "resources": {
   "langeoAPI": {
    "methods": {
+    "getOnlineUsersForCity": {
+     "id": "langeo.langeoAPI.getOnlineUsersForCity",
+     "path": "cities/{id}/onlineUsers",
+     "httpMethod": "GET",
+     "parameters": {
+      "id": {
+       "type": "string",
+       "required": true,
+       "location": "path"
+      }
+     },
+     "parameterOrder": [
+      "id"
+     ],
+     "response": {
+      "$ref": "UserCollection"
+     },
+     "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email"
+     ]
+    },
     "getUser": {
      "id": "langeo.langeoAPI.getUser",
-     "path": "{id}",
+     "path": "users/{id}",
      "httpMethod": "GET",
      "parameters": {
       "id": {
@@ -127,7 +196,7 @@
     },
     "putUser": {
      "id": "langeo.langeoAPI.putUser",
-     "path": "{id}",
+     "path": "users/{id}",
      "httpMethod": "PUT",
      "parameters": {
       "id": {

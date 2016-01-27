@@ -1,7 +1,10 @@
 package com.team.agita.langeo;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.location.Location;
+
+import com.androidmapsextensions.OnMapReadyCallback;
 import com.google.android.gms.location.LocationListener;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,14 +23,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.androidmapsextensions.GoogleMap;
+import com.androidmapsextensions.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.androidmapsextensions.Marker;
+import com.androidmapsextensions.MarkerOptions;
 import com.team.agita.langeo.achievements.ActivityAchievements;
 import com.team.agita.langeo.contacts.ActivityContacts;
 
@@ -81,11 +83,6 @@ public class ActivityMaps extends AppCompatActivity implements
     //Represents a geographical location.
     protected Location mCurrentLocation;
 
-    // Labels.1
-    protected String mLatitudeLabel;
-    protected String mLongitudeLabel;
-    protected String mLastUpdateTimeLabel;
-
     // UI Widgets.
     protected FloatingActionButton mFAB;
 
@@ -106,17 +103,21 @@ public class ActivityMaps extends AppCompatActivity implements
         Intent intent = getIntent();
 
         mFAB = (FloatingActionButton) this.findViewById(R.id.fab);
+        mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
+                (ActivityMaps.this, R.color.fab_disabled)));
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!mRequestingLocationUpdates) {
                     startLocationUpdates();
                     mRequestingLocationUpdates = true;
-                    mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_enabled));
+                    mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
+                            (ActivityMaps.this, R.color.fab_enabled)));
                 } else {
                     stopLocationUpdates();
                     mRequestingLocationUpdates = false;
-                    mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_disabled));
+                    mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
+                            (ActivityMaps.this, R.color.fab_disabled)));
                 }
             }
         });
@@ -126,7 +127,7 @@ public class ActivityMaps extends AppCompatActivity implements
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mMapFragment.getMapAsync(this);
+        mMapFragment.getExtendedMapAsync(this);
 
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
@@ -284,7 +285,8 @@ public class ActivityMaps extends AppCompatActivity implements
         // location updates if the user has requested them.
 
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_enabled));
+            mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
+                    (ActivityMaps.this, R.color.fab_enabled)));
             startLocationUpdates();
         }
     }
@@ -328,7 +330,7 @@ public class ActivityMaps extends AppCompatActivity implements
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         updateUI(false);
-        Toast.makeText(this, "Location Changed!" ,Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Location Changed!");
     }
 
     @Override
