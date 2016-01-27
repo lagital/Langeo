@@ -1,4 +1,4 @@
-package com.github.lagital.langeo;
+package com.team.agita.langeo.backend;
 
 public enum UserType {
     STANDARD,
