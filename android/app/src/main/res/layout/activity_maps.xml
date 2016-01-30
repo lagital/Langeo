@@ -1,26 +1,58 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/map"
-    tools:context=".ActivityMaps"
-    android:name="com.androidmapsextensions.SupportMapFragment">
+    android:layout_width="match_parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_gravity="bottom|right"
-        android:scaleType="center"
-        android:src="@drawable/activity_maps_fab"
-        android:elevation="4dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</fragment>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+        <com.team.agita.langeo.map.FullDrawerLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/drawer_layout"
+            android:layout_width="match_parent"
+            android:layout_marginTop="@dimen/abc_action_bar_default_height_material"
+            android:fitsSystemWindows="true"
+            android:layout_height="match_parent">
+            <!-- The main content view -->
+            <FrameLayout
+                android:id="@+id/content_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/map"
+                    tools:context=".map.ActivityMaps"
+                    android:name="com.androidmapsextensions.SupportMapFragment">
+                </fragment>
+                
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab"
+                    android:layout_gravity="bottom|right"
+                    android:scaleType="center"
+                    android:src="@drawable/activity_maps_fab"
+                    android:elevation="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </FrameLayout>
+            <!-- The navigation drawer -->
+            <ListView android:id="@+id/left_drawer"
+                android:layout_width="240dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:choiceMode="singleChoice"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0dp"
+                android:background="#111"/>
+        </com.team.agita.langeo.map.FullDrawerLayout>
+</RelativeLayout>

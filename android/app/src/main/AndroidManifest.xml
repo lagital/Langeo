@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ActivityMaps"
+            android:name=".map.ActivityMaps"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,11 +44,11 @@
         <activity
             android:name=".achievements.ActivityAchievements"
             android:label="@string/achievements_act_name"
-            android:parentActivityName=".ActivityMaps">
+            android:parentActivityName=".map.ActivityMaps">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ActivityMaps"/>
+                android:value=".map.ActivityMaps"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

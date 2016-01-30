@@ -32,7 +32,6 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
 
     private static Langeo myApiService = null;
     private Context mContext;
-    public Integer mResult = 0;
 
     public AsyncTaskInitUser(Context context){
         mContext = context;
@@ -74,9 +73,10 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
             if (user != null) {
                 //old user on new device
                 Log.d(LOG, "old user on new device");
-                LocalUser.getInstance().setShowSlides(false);
-                LocalUser.getInstance().setId(user.getId());
-                LocalUser.getInstance().setIsVisible(user.getIsVisible());
+                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
+                        prefs.getBoolean(SP_IS_VISIBLE, user.getIsVisible()),
+                        prefs.getString(SP_ID, SP_ID_ERROR));
+
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
@@ -100,9 +100,9 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                 }
                 // successful registration
                 Log.d(LOG, "successful registration");
-                LocalUser.getInstance().setShowSlides(true);
-                LocalUser.getInstance().setId(user.getId());
-                LocalUser.getInstance().setIsVisible(true);
+                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, true),
+                        prefs.getBoolean(SP_IS_VISIBLE, true),
+                        prefs.getString(SP_ID, SP_ID_ERROR));
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
@@ -117,9 +117,9 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
             Log.d(LOG,"Some login is stored on device!");
             if (userId.equals(login)) {
                 //standard Nth user login
-                LocalUser.getInstance().setShowSlides(prefs.getBoolean(SP_SLIDESHOW, false));
-                LocalUser.getInstance().setIsVisible(prefs.getBoolean(SP_IS_VISIBLE, true));
-                LocalUser.getInstance().setId(prefs.getString(SP_ID, SP_ID_ERROR));
+                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
+                        prefs.getBoolean(SP_IS_VISIBLE, true),
+                        prefs.getString(SP_ID, SP_ID_ERROR));
                 Log.d(LOG, "standard Nth user login");
 
                 return 0;
@@ -132,10 +132,9 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                     Log.d(LOG, "IOException " + e.getMessage());
                     return 1;
                 }
-
-                LocalUser.getInstance().setShowSlides(prefs.getBoolean(SP_SLIDESHOW, false));
-                LocalUser.getInstance().setIsVisible(prefs.getBoolean(SP_IS_VISIBLE, true));
-                LocalUser.getInstance().setId(prefs.getString(SP_ID, "idError"));
+                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
+                        prefs.getBoolean(SP_IS_VISIBLE, true),
+                        prefs.getString(SP_ID, SP_ID_ERROR));
                 Log.d(LOG, "re-login with a new user");
 
                 SharedPreferences.Editor editor =

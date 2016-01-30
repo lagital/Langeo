@@ -25,6 +25,14 @@
     <!-- Map status messages -->
     <string name="curr_location_perm_denied">App does not have permissions for locating you!</string>
 
+    <!-- Sliding Chat-->
+    <string name="action_hide">Hide Panel</string>
+    <string name="action_show">Show Panel</string>
+    <string name="action_anchor_enable">Enable Anchor Point</string>
+    <string name="action_anchor_disable">Disable Anchor Point</string>
+    <string name="hello">Hello></string>
+    <string name="follow">Follow</string>
+
     <!-- Google Play Services error for Toast -->
     <string name="play_services_error_fmt">Google Play Services Error: %i</string>
 

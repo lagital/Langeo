@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.support.v4.util.Pair;
 
 import com.appspot.myapplicationid.langeo.model.Coordinates;
+import com.appspot.myapplicationid.langeo.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.util.ArrayList;
@@ -24,8 +25,10 @@ public class LocalUser{
     public Boolean isVisible = true;
     public Pair<String, Integer>[] languages;
     public Boolean showSlides = true;
+    public UserType userType;
+    public String cityId;
 
-    private static LocalUser user = null;
+    private static LocalUser mUser = null;
 
     /* A private Constructor prevents any other
      * class from instantiating.
@@ -34,9 +37,28 @@ public class LocalUser{
 
     /* Static 'instance' method */
     public static LocalUser getInstance( ) {
-        if (user == null) {
-            user = new LocalUser();
+        if (mUser == null) {
+            mUser = new LocalUser();
         }
+        return mUser;
+    }
+
+    public static void updateStorages(Context context) {
+        AsyncTaskUpdateStorages task = new AsyncTaskUpdateStorages(context);
+        task.execute();
+    }
+
+    public void fill(Boolean showSlides,Boolean isVisible, String id) {
+        mUser.setShowSlides(showSlides);
+        mUser.setIsVisible(isVisible);
+        mUser.setId(id);
+    }
+
+    public User extractAPIUser() {
+        User user = new User();
+        user.setIsVisible(isVisible);
+        user.setId(id);
+        user.setCoordinates(coordinates);
         return user;
     }
 
@@ -50,9 +72,8 @@ public class LocalUser{
         eMail = acct.getEmail();
     }
 
-    public static void updateStorages(Context context) {
-        AsyncTaskUpdateStorages task = new AsyncTaskUpdateStorages(context);
-        task.execute();
+    public void setAchievementsReached(ArrayList<Integer> achievementsReached) {
+        this.achievementsReached = achievementsReached;
     }
 
     public void reachAchievement (Integer number) {
@@ -111,8 +132,20 @@ public class LocalUser{
         return achievementsReached;
     }
 
-    public void setAchievementsReached(ArrayList<Integer> achievementsReached) {
-        this.achievementsReached = achievementsReached;
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
+    }
+
+    public String getCityId() {
+        return cityId;
+    }
+
+    public void setCityId(String cityId) {
+        this.cityId = cityId;
     }
 
 }

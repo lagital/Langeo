@@ -1,4 +1,4 @@
-package com.team.agita.langeo;
+package com.team.agita.langeo.map;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -6,9 +6,11 @@ import android.location.Location;
 
 import com.androidmapsextensions.OnMapReadyCallback;
 import com.google.android.gms.location.LocationListener;
+
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -16,6 +18,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,6 +35,9 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.androidmapsextensions.Marker;
 import com.androidmapsextensions.MarkerOptions;
+import com.team.agita.langeo.ActivityProfile;
+import com.team.agita.langeo.ActivitySignin;
+import com.team.agita.langeo.R;
 import com.team.agita.langeo.achievements.ActivityAchievements;
 import com.team.agita.langeo.contacts.ActivityContacts;
 
@@ -55,7 +63,6 @@ public class ActivityMaps extends AppCompatActivity implements
     public static int CAMERA_BEARING = 90;
     public static int CAMERA_TILT = 40;
     public static int CAMERA_ZOOM = 16;
-
 
     /**
      * The fastest rate for active location updates. Exact. Updates will never be more frequent
@@ -95,12 +102,32 @@ public class ActivityMaps extends AppCompatActivity implements
     //Time when the location was updated represented as a String.
     protected String mLastUpdateTime;
 
+    // Drawer
+    private ListView mDrawerList;
+    private CharSequence mTitle;
+    private String[] mPlanetTitles;
+    private FullDrawerLayout mDrawerLayout;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
         Intent intent = getIntent();
+
+
+        mPlanetTitles = new String [] {"Earth", "Mars"};
+        mDrawerLayout = (FullDrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mPlanetTitles));
+        // Set the list's click listener
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
 
         mFAB = (FloatingActionButton) this.findViewById(R.id.fab);
         mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
@@ -159,6 +186,7 @@ public class ActivityMaps extends AppCompatActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbar, menu);
         return true;
@@ -384,7 +412,19 @@ public class ActivityMaps extends AppCompatActivity implements
                 startActivity(sintent);
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        getActionBar().setTitle(mTitle);
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+            return;
+        }
     }
 }
