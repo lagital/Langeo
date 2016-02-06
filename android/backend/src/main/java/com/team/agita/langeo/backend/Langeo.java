@@ -6,6 +6,8 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.impl.translate.opt.joda.JodaTimeTranslators;
 
+import java.util.Objects;
+
 import static com.googlecode.objectify.ObjectifyService.factory;
 import static com.googlecode.objectify.ObjectifyService.ofy;
 import static java.lang.String.format;
@@ -14,6 +16,7 @@ public class Langeo {
     static {
         JodaTimeTranslators.add(factory());
         ObjectifyService.register(MutableUserImpl.class);
+        ObjectifyService.register(MutableMeetingImpl.class);
     }
 
 
@@ -48,6 +51,54 @@ public class Langeo {
     }
 
 
+    public static Meeting getMeeting(long id) throws MeetingNotFoundException {
+        Meeting meeting = ofy().load()
+                .type(MutableMeetingImpl.class)
+                .id(id).now();
+        if (meeting == null) {
+            throw new MeetingNotFoundException(id);
+        }
+        return meeting;
+    }
+
+    public static Meeting createMeeting(String userEmail, Changer<MutableMeeting> meetingChanger) throws UserNotFoundByEmailException {
+        User user = ofy().load()
+                .type(MutableUserImpl.class)
+                .filter("email == ", userEmail)
+                .first().now();
+        if (user == null) {
+            throw new UserNotFoundByEmailException(userEmail);
+        }
+        MutableMeeting meeting = new MutableMeetingImpl();
+        meeting.setOwnerUserId(user.getId());
+        meetingChanger.change(meeting);
+        ofy().save().entity(meeting).now();
+        return meeting;
+    }
+
+    public static void changeMeeting(long meetingId, String userEmail, Changer<MutableMeeting> meetingChanger)
+            throws UserNotFoundByEmailException, MeetingNotFoundException, TryingToChangeMeetingThatBelongsToOtherUserException {
+        User user = ofy().load()
+                .type(MutableUserImpl.class)
+                .filter("email == ", userEmail)
+                .first().now();
+        if (user == null) {
+            throw new UserNotFoundByEmailException(userEmail);
+        }
+        MutableMeeting meeting = ofy().load()
+                .type(MutableMeetingImpl.class)
+                .id(meetingId).now();
+        if (meeting == null) {
+            throw new MeetingNotFoundException(meetingId);
+        }
+        if (!Objects.equals(meeting.getOwnerUserId(), user.getId())) {
+            throw new TryingToChangeMeetingThatBelongsToOtherUserException(meetingId, meeting.getOwnerUserId(), user.getId());
+        }
+        meetingChanger.change(meeting);
+        ofy().save().entity(meeting).now();
+    }
+
+
     public interface User {
         Long getId();
         String getEmail();
@@ -59,7 +110,6 @@ public class Langeo {
     }
 
     public interface MutableUser extends User {
-        void setId(Long id);
         void setEmail(String email);
         void setVisible(boolean visible);
         void setAchievements(UserAchievement... achievements);
@@ -79,21 +129,60 @@ public class Langeo {
     }
 
 
+    public interface Meeting {
+        Long getId();
+        String getName();
+        String getLocation();
+        Long getTimestampFrom();
+        Long getTimestampTo();
+        Long getOwnerUserId();
+        String getLanguage();
+    }
+
+    public interface MutableMeeting extends Meeting {
+        void setName(String name);
+        void setLocation(String location);
+        void setTimestampFrom(Long timestampFrom);
+        void setTimestampTo(Long timestampTo);
+        void setOwnerUserId(Long ownerUserId);
+        void setLanguage(String language);
+    }
+
+
     public interface Changer<T> {
         void change(T t);
     }
 
 
 
-    public static class UserNotFoundException extends Exception {
+    public static class NotFoundException extends Exception {
+        public NotFoundException(String entity, String field, String value) {
+            super(format("%s with %s = '%s' doesn't exist", entity, field, value));
+        }
+    }
+
+    public static class UserNotFoundException extends NotFoundException {
         public UserNotFoundException(String field, String value) {
-            super(format("User with %s = '%s' doesn't exist", field, value));
+            super("User", field, value);
         }
     }
 
     public static class UserNotFoundByEmailException extends UserNotFoundException {
         public UserNotFoundByEmailException(String value) {
             super("email", value);
+        }
+    }
+
+    public static class MeetingNotFoundException extends NotFoundException {
+        public MeetingNotFoundException(Long id) {
+            super("Meeting", "id", String.valueOf(id));
+        }
+    }
+
+    public static class TryingToChangeMeetingThatBelongsToOtherUserException extends Exception {
+        public TryingToChangeMeetingThatBelongsToOtherUserException(Long meetingId, Long correctUserId, Long incorrectUserId) {
+            super(format("You are trying to change meeting %d that belongs to user %d. You are user %d.", meetingId,
+                    correctUserId, incorrectUserId));
         }
     }
 
@@ -111,11 +200,6 @@ public class Langeo {
         @Override
         public Long getId() {
             return id;
-        }
-
-        @Override
-        public void setId(Long id) {
-            this.id = id;
         }
 
         @Override
@@ -176,6 +260,87 @@ public class Langeo {
         @Override
         public void setContactFacebook(String contactFacebook) {
             this.contactFacebook = contactFacebook;
+        }
+    }
+
+
+    @Entity
+    private static class MutableMeetingImpl implements MutableMeeting {
+        @Id private Long id;
+        private String name;
+        private String location;
+        private Long timestampFrom;
+        private Long timestampTo;
+        private Long ownerUserId;
+        private String language;
+
+        @Override
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getLocation() {
+            return location;
+        }
+
+        @Override
+        public void setLocation(String location) {
+            this.location = location;
+        }
+
+        @Override
+        public Long getTimestampFrom() {
+            return timestampFrom;
+        }
+
+        @Override
+        public void setTimestampFrom(Long timestampFrom) {
+            this.timestampFrom = timestampFrom;
+        }
+
+        @Override
+        public Long getTimestampTo() {
+            return timestampTo;
+        }
+
+        @Override
+        public void setTimestampTo(Long timestampTo) {
+            this.timestampTo = timestampTo;
+        }
+
+        @Override
+        public Long getOwnerUserId() {
+            return ownerUserId;
+        }
+
+        @Override
+        public void setOwnerUserId(Long ownerUserId) {
+            this.ownerUserId = ownerUserId;
+        }
+
+        @Override
+        public String getLanguage() {
+            return language;
+        }
+
+        @Override
+        public void setLanguage(String language) {
+            this.language = language;
         }
     }
 }
