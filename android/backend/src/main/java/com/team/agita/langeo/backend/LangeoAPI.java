@@ -2,22 +2,14 @@ package com.team.agita.langeo.backend;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
-import com.google.api.server.spi.config.Named;
-import com.google.api.server.spi.response.ForbiddenException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.oauth.OAuthRequestException;
-import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.impl.translate.opt.joda.JodaTimeTranslators;
-import org.joda.time.DateTime;
-
-import java.util.List;
-import java.util.Objects;
+import com.google.appengine.api.users.User;
 
 import static com.google.api.server.spi.config.ApiMethod.HttpMethod.GET;
 import static com.google.api.server.spi.config.ApiMethod.HttpMethod.PUT;
-import static com.googlecode.objectify.ObjectifyService.factory;
-import static com.googlecode.objectify.ObjectifyService.ofy;
-import static java.lang.String.format;
+import static com.team.agita.langeo.backend.Langeo.changeOrCreateUserByEmail;
+import static com.team.agita.langeo.backend.Langeo.getUserByEmail;
 
 @Api(
         name = "langeo",
@@ -25,63 +17,86 @@ import static java.lang.String.format;
         scopes = "https://www.googleapis.com/auth/userinfo.email"
 )
 public class LangeoAPI {
-    static {
-        JodaTimeTranslators.add(factory());
-        ObjectifyService.register(User.class);
+    @ApiMethod(httpMethod = GET, path = "currentUser")
+    public GetCurrentUserResponse getCurrentUser(User user) throws OAuthRequestException, NotFoundException {
+        try {
+            return new GetCurrentUserResponse(getUserByEmail(getUserEmail(user)));
+        } catch (Langeo.UserNotFoundByEmailException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @ApiMethod(httpMethod = PUT, path = "currentUser")
+    public void putCurrentUser(User user, PutCurrentUserRequest request) throws OAuthRequestException, NotFoundException {
+        changeOrCreateUserByEmail(getUserEmail(user), new PutCurrentUserRequestUserChanger(request));
     }
 
 
-    @ApiMethod(httpMethod = GET, path = "users/{id}")
-    public User getUser(@Named("id") String id, com.google.appengine.api.users.User user) throws OAuthRequestException, NotFoundException {
-        if (user == null) {
-            throw new OAuthRequestException("");
-        }
-        User langeoUser = ofy().load()
-                .type(User.class)
-                .id(id)
-                .now();
-        if (langeoUser == null) {
-            throw new NotFoundException(format("There is no user %s", user.getEmail()));
-//            langeoUser = new User();
-//            langeoUser.id = id;
-        }
-//        langeoUser.lastRequestTime = DateTime.now();
-        ofy().save().entity(langeoUser).now();
-        return langeoUser;
-    }
+    /*@ApiMethod(httpMethod = GET, path = "users/{id}")
+    public GetUserResponse getUser(@Named("id") String id) throws NotFoundException {
+    }*/
 
-    @ApiMethod(httpMethod = PUT, path = "users/{id}")
-    public void putUser(@Named("id") String email, User langeoUser, com.google.appengine.api.users.User user) throws OAuthRequestException, ForbiddenException {
-        if (user == null) {
-            throw new OAuthRequestException("");
+
+
+    public static class GetCurrentUserResponse {
+        public final Long id;
+        public final String email;
+        public final Boolean isVisible;
+        public final Langeo.UserAchievement[] achievements;
+        public final Langeo.UserType type;
+
+        public GetCurrentUserResponse(Langeo.User user) {
+            this.id = user.getId();
+            this.email = user.getEmail();
+            this.isVisible = user.isVisible();
+            this.achievements = user.getAchievements() != null && user.getAchievements().length > 0 ? user.getAchievements() : null;
+            this.type = user.getType();
         }
-        if (!Objects.equals(user.getEmail(), email)) {
-            throw new ForbiddenException(format("You (%s) are trying to change information about other user (%s)", user.getEmail(), email));
-        }
-        langeoUser.id = email;
-//        langeoUser.lastRequestTime = DateTime.now();
-        ofy().save().entity(langeoUser).now();
     }
 
 
-    @ApiMethod(httpMethod = GET, path = "cities/{id}/onlineUsers")
-    public List<User> getOnlineUsersForCity(@Named("id") String cityId, com.google.appengine.api.users.User user)
-            throws OAuthRequestException, NotFoundException {
+    public static class PutCurrentUserRequest {
+        public Boolean isVisible;
+        public Langeo.UserAchievement[] achievements;
+        public Langeo.UserType type;
+    }
+
+
+    /*public static class GetUserResponse {
+
+    }*/
+
+
+
+    private static String getUserEmail(User user) throws OAuthRequestException {
         if (user == null) {
-            throw new OAuthRequestException("");
+            throw new OAuthRequestException("You are not signed in");
         }
-        User langeoUser = ofy().load()
-                .type(User.class)
-                .id(user.getEmail())
-                .now();
-        if (langeoUser != null) {
-//            langeoUser.lastRequestTime = DateTime.now();
-            ofy().save().entity(langeoUser).now();
+        if (user.getEmail() == null) {
+            throw new OAuthRequestException("You are signed in but Google doesn't show your email");
         }
-        return ofy().load()
-                .type(User.class)
-                .filter("lastRequestTime >= ", DateTime.now().minusMinutes(3))
-                .filter("cityId == ", cityId)
-                .list();
+        return user.getEmail();
+    }
+
+
+    private static class PutCurrentUserRequestUserChanger implements Langeo.Changer<Langeo.MutableUser> {
+        private final PutCurrentUserRequest request;
+
+        PutCurrentUserRequestUserChanger(PutCurrentUserRequest request) {
+            this.request = request;
+        }
+
+        @Override
+        public void change(Langeo.MutableUser user) {
+            if (request.isVisible != null) {
+                user.setVisible(request.isVisible);
+            }
+            if (request.achievements != null) {
+                user.setAchievements(request.achievements);
+            }
+            if (request.type != null) {
+                user.setType(request.type);
+            }
+        }
     }
 }
