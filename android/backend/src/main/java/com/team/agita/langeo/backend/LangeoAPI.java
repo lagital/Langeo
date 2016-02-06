@@ -44,6 +44,8 @@ public class LangeoAPI {
         public final Boolean isVisible;
         public final Langeo.UserAchievement[] achievements;
         public final Langeo.UserType type;
+        public final String contactVk;
+        public final String contactFacebook;
 
         public GetCurrentUserResponse(Langeo.User user) {
             this.id = user.getId();
@@ -51,6 +53,8 @@ public class LangeoAPI {
             this.isVisible = user.isVisible();
             this.achievements = user.getAchievements() != null && user.getAchievements().length > 0 ? user.getAchievements() : null;
             this.type = user.getType();
+            this.contactVk = user.getContactVk();
+            this.contactFacebook = user.getContactFacebook();
         }
     }
 
@@ -59,6 +63,8 @@ public class LangeoAPI {
         public Boolean isVisible;
         public Langeo.UserAchievement[] achievements;
         public Langeo.UserType type;
+        public String contactVk;
+        public String contactFacebook;
     }
 
 
@@ -96,6 +102,12 @@ public class LangeoAPI {
             }
             if (request.type != null) {
                 user.setType(request.type);
+            }
+            if (request.contactVk != null) {
+                user.setContactVk(request.contactVk);
+            }
+            if (request.contactFacebook != null) {
+                user.setContactFacebook(request.contactFacebook);
             }
         }
     }

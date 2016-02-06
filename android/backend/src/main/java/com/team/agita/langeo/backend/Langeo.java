@@ -54,14 +54,18 @@ public class Langeo {
         boolean isVisible();
         UserAchievement[] getAchievements();
         UserType getType();
+        String getContactVk();
+        String getContactFacebook();
     }
 
     public interface MutableUser extends User {
-        void setId(Long newValue);
-        void setEmail(String newValue);
-        void setVisible(boolean newValue);
-        void setAchievements(UserAchievement... newValue);
-        void setType(UserType newValue);
+        void setId(Long id);
+        void setEmail(String email);
+        void setVisible(boolean visible);
+        void setAchievements(UserAchievement... achievements);
+        void setType(UserType type);
+        void setContactVk(String contactVk);
+        void setContactFacebook(String contactFacebook);
     }
 
     public enum UserType {
@@ -101,6 +105,8 @@ public class Langeo {
         private boolean visible;
         private UserAchievement[] achievements;
         private UserType type;
+        private String contactVk;
+        private String contactFacebook;
 
         @Override
         public Long getId() {
@@ -108,8 +114,8 @@ public class Langeo {
         }
 
         @Override
-        public void setId(Long newValue) {
-            this.id = newValue;
+        public void setId(Long id) {
+            this.id = id;
         }
 
         @Override
@@ -118,8 +124,8 @@ public class Langeo {
         }
 
         @Override
-        public void setEmail(String newValue) {
-            this.email = newValue;
+        public void setEmail(String email) {
+            this.email = email;
         }
 
         @Override
@@ -128,8 +134,8 @@ public class Langeo {
         }
 
         @Override
-        public void setVisible(boolean newValue) {
-            this.visible = newValue;
+        public void setVisible(boolean visible) {
+            this.visible = visible;
         }
 
         @Override
@@ -138,8 +144,8 @@ public class Langeo {
         }
 
         @Override
-        public void setAchievements(UserAchievement... newValue) {
-            this.achievements = newValue;
+        public void setAchievements(UserAchievement... achievements) {
+            this.achievements = achievements;
         }
 
         @Override
@@ -148,8 +154,28 @@ public class Langeo {
         }
 
         @Override
-        public void setType(UserType newValue) {
-            this.type = newValue;
+        public void setType(UserType type) {
+            this.type = type;
+        }
+
+        @Override
+        public String getContactVk() {
+            return contactVk;
+        }
+
+        @Override
+        public void setContactVk(String contactVk) {
+            this.contactVk = contactVk;
+        }
+
+        @Override
+        public String getContactFacebook() {
+            return contactFacebook;
+        }
+
+        @Override
+        public void setContactFacebook(String contactFacebook) {
+            this.contactFacebook = contactFacebook;
         }
     }
 }
