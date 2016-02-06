@@ -8,6 +8,9 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.oauth.OAuthRequestException;
 import com.google.appengine.api.users.User;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import static com.google.api.server.spi.config.ApiMethod.HttpMethod.GET;
 import static com.google.api.server.spi.config.ApiMethod.HttpMethod.POST;
 import static com.google.api.server.spi.config.ApiMethod.HttpMethod.PUT;
@@ -29,7 +32,7 @@ public class LangeoAPI {
     }
 
     @ApiMethod(httpMethod = PUT, path = "currentUser")
-    public void putCurrentUser(User user, PutCurrentUserRequest request) throws OAuthRequestException, NotFoundException {
+    public void putCurrentUser(User user, PutCurrentUserRequest request) throws OAuthRequestException {
         Langeo.changeOrCreateUserByEmail(getUserEmail(user), request);
     }
 
@@ -43,8 +46,18 @@ public class LangeoAPI {
         }
     }
 
+    @ApiMethod(httpMethod = GET, path = "meetings")
+    public GetMeetingsResponse getMeetings(@Named("location") String location) throws NotFoundException {
+        Collection<GetMeetingResponse> getMeetingResponses = new ArrayList<>();
+        for (Langeo.Meeting meeting : Langeo.getMeetings(location)) {
+            getMeetingResponses.add(new GetMeetingResponse(meeting));
+        }
+        return new GetMeetingsResponse(getMeetingResponses);
+    }
+
     @ApiMethod(httpMethod = POST, path = "meetings")
-    public GetMeetingResponse postMeeting(User user, PostOrPutMeetingRequest request) throws OAuthRequestException, NotFoundException {
+    public GetMeetingResponse postMeeting(User user, PostOrPutMeetingRequest request)
+            throws OAuthRequestException, NotFoundException {
         try {
             return new GetMeetingResponse(Langeo.createMeeting(getUserEmail(user), request));
         } catch (Langeo.UserNotFoundByEmailException e) {
@@ -53,7 +66,8 @@ public class LangeoAPI {
     }
 
     @ApiMethod(httpMethod = PUT, path = "meetings/{id}")
-    public void putMeeting(@Named("id") long id, User user, PostOrPutMeetingRequest request) throws OAuthRequestException, NotFoundException, ForbiddenException {
+    public void putMeeting(@Named("id") long id, User user, PostOrPutMeetingRequest request)
+            throws OAuthRequestException, NotFoundException, ForbiddenException {
         try {
             Langeo.changeMeeting(id, getUserEmail(user), request);
         } catch (Langeo.UserNotFoundByEmailException | Langeo.MeetingNotFoundException e) {
@@ -120,6 +134,14 @@ public class LangeoAPI {
             this.timestampTo = meeting.getTimestampTo();
             this.ownerUserId = meeting.getOwnerUserId();
             this.language = meeting.getLanguage();
+        }
+    }
+
+    public static class GetMeetingsResponse {
+        public final Collection<GetMeetingResponse> meetings;
+
+        public GetMeetingsResponse(Collection<GetMeetingResponse> meetings) {
+            this.meetings = meetings;
         }
     }
 

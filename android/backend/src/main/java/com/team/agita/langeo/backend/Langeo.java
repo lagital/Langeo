@@ -12,6 +12,9 @@ import static com.googlecode.objectify.ObjectifyService.factory;
 import static com.googlecode.objectify.ObjectifyService.ofy;
 import static java.lang.String.format;
 
+// TODO: транзакции
+// TODO: убрать дублирование кода
+// TODO: тесты?
 public class Langeo {
     static {
         JodaTimeTranslators.add(factory());
@@ -59,6 +62,13 @@ public class Langeo {
             throw new MeetingNotFoundException(id);
         }
         return meeting;
+    }
+
+    public static Iterable<? extends Meeting> getMeetings(String location) {
+        return ofy().load()
+                .type(MutableMeetingImpl.class)
+                .filter("location == ", location)
+                .iterable();
     }
 
     public static Meeting createMeeting(String userEmail, Changer<MutableMeeting> meetingChanger) throws UserNotFoundByEmailException {
@@ -268,7 +278,7 @@ public class Langeo {
     private static class MutableMeetingImpl implements MutableMeeting {
         @Id private Long id;
         private String name;
-        private String location;
+        @Index private String location;
         private Long timestampFrom;
         private Long timestampTo;
         private Long ownerUserId;
@@ -277,10 +287,6 @@ public class Langeo {
         @Override
         public Long getId() {
             return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
         }
 
         @Override
