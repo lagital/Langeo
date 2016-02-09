@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.util.Pair;
 
-import com.appspot.myapplicationid.langeo.model.Coordinates;
-import com.appspot.myapplicationid.langeo.model.User;
+import com.appspot.id.app.langeo.model.Coordinates;
+import com.appspot.id.app.langeo.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.util.ArrayList;
@@ -68,8 +68,8 @@ public class LocalUser{
         achievementsReached.add(2);
 
         AsyncTaskInitUser task = new AsyncTaskInitUser(context);
-        task.execute(acct.getId());
         eMail = acct.getEmail();
+        task.execute(eMail);
     }
 
     public void setAchievementsReached(ArrayList<Integer> achievementsReached) {

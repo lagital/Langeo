@@ -6,8 +6,9 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.appspot.myapplicationid.langeo.Langeo;
-import com.appspot.myapplicationid.langeo.model.User;
+
+import com.appspot.id.app.langeo.Langeo;
+import com.appspot.id.app.langeo.model.User;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
@@ -21,6 +22,7 @@ class AsyncTaskUpdateStorages extends AsyncTask<Void, Void, Integer> {
     private static final String LOG = "AsyncTaskUpdateStorages";
     private static final String MY_PREFS_NAME = "LangeoPreferences";
     private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
+    private static final String BACKEND_ADDRESS = "http://langeoapp.appspot.com:8080/_ah/api";
 
     // Shared Preferences names
     private static final String SP_ID = "id";
@@ -39,21 +41,21 @@ class AsyncTaskUpdateStorages extends AsyncTask<Void, Void, Integer> {
     @Override
     protected Integer doInBackground(Void...params) {
         if (myApiService == null) {  // Only do this once
-            //For local tests:
-            Langeo.Builder builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
-                    new AndroidJsonFactory(), null)
-                    .setRootUrl(LOCAL_ADDRESS)
-                    .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
-                        @Override
-                        public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
-                            abstractGoogleClientRequest.setDisableGZipContent(true);
-                        }
-                    });
-            // For deploy tests:
-            /*
-            Langeo.Builder builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
-                    .setRootUrl("https://langeoapp.appspot.com/_ah/api/");
-            */
+            Langeo.Builder builder;
+            if (BuildConfig.DEBUG) {
+                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(), null)
+                        .setRootUrl(LOCAL_ADDRESS)
+                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                            @Override
+                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                                abstractGoogleClientRequest.setDisableGZipContent(true);
+                            }
+                        });
+            } else {
+                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
+                        .setRootUrl("https://langeoapp.appspot.com/_ah/api/");
+            }
             myApiService = builder.build();
         }
 
@@ -69,7 +71,7 @@ class AsyncTaskUpdateStorages extends AsyncTask<Void, Void, Integer> {
             User user = new User();
             user.setId(LocalUser.getInstance().getId());
             user.setIsVisible(LocalUser.getInstance().getIsVisible());
-            myApiService.langeoAPI().putUser(user.getId(), user).execute();
+                myApiService.langeoAPI().getCurrentUser().execute();
             return 0;
         } catch (IOException e) {
             Log.d(LOG, "IOException " + e.getMessage());

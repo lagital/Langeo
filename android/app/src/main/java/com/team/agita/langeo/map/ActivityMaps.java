@@ -4,15 +4,18 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.location.Location;
 
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener;
+
 import com.androidmapsextensions.OnMapReadyCallback;
 import com.google.android.gms.location.LocationListener;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -42,7 +46,9 @@ import com.team.agita.langeo.achievements.ActivityAchievements;
 import com.team.agita.langeo.contacts.ActivityContacts;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class ActivityMaps extends AppCompatActivity implements
         GoogleMap.OnInfoWindowClickListener,
@@ -102,13 +108,7 @@ public class ActivityMaps extends AppCompatActivity implements
     //Time when the location was updated represented as a String.
     protected String mLastUpdateTime;
 
-    // Drawer
-    private ListView mDrawerList;
-    private CharSequence mTitle;
-    private String[] mPlanetTitles;
-    private FullDrawerLayout mDrawerLayout;
-
-
+    private SlidingUpPanelLayout mLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,17 +117,63 @@ public class ActivityMaps extends AppCompatActivity implements
 
         Intent intent = getIntent();
 
+        ListView lv = (ListView) findViewById(R.id.list);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(ActivityMaps.this, "onItemClick", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        mPlanetTitles = new String [] {"Earth", "Mars"};
-        mDrawerLayout = (FullDrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        List<String> your_array_list = Arrays.asList(
+                "This",
+                "Is",
+                "Test"
 
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mPlanetTitles));
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        );
 
+        // This is the array adapter, it takes the context of the activity as a
+        // first parameter, the type of list view as a second parameter and your
+        // array as a third parameter.
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_list_item_1,
+                your_array_list );
+
+        lv.setAdapter(arrayAdapter);
+
+        mLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+            mLayout.setPanelSlideListener(new PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                Log.i(TAG, "onPanelSlide, offset " + slideOffset);
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+                Log.i(TAG, "onPanelExpanded");
+
+            }
+
+            @Override
+            public void onPanelCollapsed(View panel) {
+                Log.i(TAG, "onPanelCollapsed");
+
+            }
+
+            @Override
+            public void onPanelAnchored(View panel) {
+                Log.i(TAG, "onPanelAnchored");
+            }
+
+            @Override
+            public void onPanelHidden(View panel) {
+                Log.i(TAG, "onPanelHidden");
+            }
+        });
+
+        TextView t = (TextView) findViewById(R.id.name);
+        t.setText(Html.fromHtml(getString(R.string.hello)));
 
         mFAB = (FloatingActionButton) this.findViewById(R.id.fab);
         mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
@@ -415,16 +461,4 @@ public class ActivityMaps extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void setTitle(CharSequence title) {
-        mTitle = title;
-        getActionBar().setTitle(mTitle);
-    }
-
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id) {
-            return;
-        }
-    }
 }
