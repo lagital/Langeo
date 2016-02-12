@@ -2,8 +2,19 @@ package com.team.agita.langeo.map;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 
+import com.appspot.id.app.langeo.Langeo;
+import com.appspot.id.app.langeo.model.Coordinates;
+import com.appspot.id.app.langeo.model.GetMeetingResponse;
+import com.appspot.id.app.langeo.model.GetMeetingsResponse;
+import com.appspot.id.app.langeo.model.PostOrPutMeetingRequest;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
+import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener;
 
@@ -21,6 +32,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -41,14 +55,20 @@ import com.androidmapsextensions.Marker;
 import com.androidmapsextensions.MarkerOptions;
 import com.team.agita.langeo.ActivityProfile;
 import com.team.agita.langeo.ActivitySignin;
+import com.team.agita.langeo.AsyncTaskGetMeetings;
+import com.team.agita.langeo.AsyncTaskPostOrPutMeeting;
+import com.team.agita.langeo.BuildConfig;
+import com.team.agita.langeo.LocalUser;
 import com.team.agita.langeo.R;
 import com.team.agita.langeo.achievements.ActivityAchievements;
 import com.team.agita.langeo.contacts.ActivityContacts;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ActivityMaps extends AppCompatActivity implements
         GoogleMap.OnInfoWindowClickListener,
@@ -98,6 +118,8 @@ public class ActivityMaps extends AppCompatActivity implements
 
     // UI Widgets.
     protected FloatingActionButton mFAB;
+    protected FABState mFABState = FABState.NEW_MEETING;
+    protected View vMap;
 
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
@@ -109,6 +131,17 @@ public class ActivityMaps extends AppCompatActivity implements
     protected String mLastUpdateTime;
 
     private SlidingUpPanelLayout mLayout;
+    private static Langeo myApiService = null;
+    private Geocoder mGeoCoder;
+    private Boolean mInitial = true;
+    private Boolean mMapForNewMeeting = false;
+
+    private final String mClickOnTheMap = "Click on the map!";
+
+    public  List<GetMeetingResponse> mMeetings;
+    private List<Marker> mMeetMarkers;
+
+    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,30 +150,44 @@ public class ActivityMaps extends AppCompatActivity implements
 
         Intent intent = getIntent();
 
-        ListView lv = (ListView) findViewById(R.id.list);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGeoCoder = new Geocoder(this, Locale.getDefault());
+        vMap = findViewById(R.id.map);
+
+        if (myApiService == null) {  // Only do this once
+            Langeo.Builder builder;
+            if (BuildConfig.DEBUG) {
+                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(), null)
+                        .setRootUrl(LOCAL_ADDRESS)
+                        .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                            @Override
+                            public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                                abstractGoogleClientRequest.setDisableGZipContent(true);
+                            }
+                        });
+            } else {
+                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
+                        .setRootUrl("https://langeoapp.appspot.com/_ah/api/");
+            }
+            myApiService = builder.build();
+        }
+
+        ListView vChat = (ListView) findViewById(R.id.list);
+        vChat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(ActivityMaps.this, "onItemClick", Toast.LENGTH_SHORT).show();
             }
         });
 
-        List<String> your_array_list = Arrays.asList(
-                "This",
-                "Is",
-                "Test"
+        List<String> your_array_list = Arrays.asList("This", "Is", "Test");
 
-        );
-
-        // This is the array adapter, it takes the context of the activity as a
-        // first parameter, the type of list view as a second parameter and your
-        // array as a third parameter.
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_list_item_1,
                 your_array_list );
 
-        lv.setAdapter(arrayAdapter);
+        vChat.setAdapter(arrayAdapter);
 
         mLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
             mLayout.setPanelSlideListener(new PanelSlideListener() {
@@ -181,17 +228,23 @@ public class ActivityMaps extends AppCompatActivity implements
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mRequestingLocationUpdates) {
-                    startLocationUpdates();
-                    mRequestingLocationUpdates = true;
-                    mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
-                            (ActivityMaps.this, R.color.fab_enabled)));
-                } else {
-                    stopLocationUpdates();
-                    mRequestingLocationUpdates = false;
-                    mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
-                            (ActivityMaps.this, R.color.fab_disabled)));
+                switch (mFABState) {
+                    case NEW_MEETING:
+                        //TODO: new Meeting addition
+                        mMapForNewMeeting = true;
+                        Toast.makeText(ActivityMaps.this, mClickOnTheMap, Toast.LENGTH_SHORT).show();
+                        final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
+                        animation.setDuration(500); // duration - half a second
+                        animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
+                        animation.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
+                        animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
+                        vMap.startAnimation(animation);
+                    case EDIT_MEETING:
+                        //TODO: Meeting edit
+                    case CANCEL_ADD_MEETING:
+                        //TODO: Meeting add Cancellation
                 }
+
             }
         });
 
@@ -218,16 +271,101 @@ public class ActivityMaps extends AppCompatActivity implements
         // Add a marker on current location, and move the camera
         mMap = map;
         mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(final LatLng arg0) {
+                if (mMapForNewMeeting == true) {
+                    Log.d(TAG, "OnMapClick to add Meeting");
+                    mMapForNewMeeting = false;
+                    vMap.clearAnimation();
+                    PostOrPutMeetingRequest popmr = new PostOrPutMeetingRequest();
+                    Coordinates c = new Coordinates();
+                    c.setLatitude(arg0.latitude);
+                    c.setLongitude(arg0.longitude);
+                    popmr.setCoordinates(c);
+                    popmr.setName("Test!");
+                    popmr.setLocation(LocalUser.getInstance().getCityId());
+                    AsyncTaskPostOrPutMeeting task = new AsyncTaskPostOrPutMeeting(ActivityMaps.this);
+                    task.execute(popmr);
+                }
+            }
+        });
         mMarkerMe = map.addMarker(new MarkerOptions().position(new LatLng(0.0, 0.0))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                 .visible(true));
     }
 
+    //Requests location updates from the FusedLocationApi.
+    protected void startLocationUpdates() {
+        // The final argument to {@code requestLocationUpdates()} is a LocationListener
+        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+        Log.d(TAG, "startLocationUpdates");
+    }
+
+    //Callback that fires when the location changes.
+    @Override
+    public void onLocationChanged(Location location) {
+        mCurrentLocation = location;
+        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        try {
+            updateUI(false);
+        } catch (IOException e) {
+            Log.d(TAG, e.getMessage());
+        }
+    }
+
+    //Updates the latitude, the longitude, and the last location time in the UI.
+    public void updateUI(Boolean fromAsync) throws IOException {
+        Log.d(TAG, "Start updateUI");
+        if (mInitial) {
+            mInitial = false;
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 13));
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(mCurrentLocation.getLatitude(),
+                            mCurrentLocation.getLongitude())) // Sets the center of the map to location user
+                    .zoom(CAMERA_ZOOM)          // Sets the zoom
+                    .bearing(CAMERA_BEARING)    // Sets the orientation of the camera to east
+                    .tilt(CAMERA_TILT)          // Sets the tilt of the camera to 30 degrees
+                    .build();                   // Creates a CameraPosition from the builder
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            List<Address> addresses = mGeoCoder.getFromLocation(mCurrentLocation.getLatitude(),
+                    mCurrentLocation.getLongitude(), 1);
+            LocalUser.getInstance().setCityId(addresses.get(0).getLocality());
+        }
+
+        mMarkerMe.setPosition(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
+
+        if (!LocalUser.getInstance().getCityId().isEmpty()) {
+            if (!fromAsync) {
+                Log.d(TAG, "not from Async");
+                AsyncTaskGetMeetings task = new AsyncTaskGetMeetings(this);
+                task.execute();
+            } else {
+                for (GetMeetingResponse meeting : mMeetings) {
+                    Marker tmp = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(meeting.getCoordinates().getLatitude(),
+                                    meeting.getCoordinates().getLongitude()))
+                            .icon(BitmapDescriptorFactory.
+                                    defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                            .visible(true));
+                    tmp.setData(meeting);
+                    mMeetMarkers.add(tmp);
+                }
+
+            }
+        }
+        Log.d(TAG, "finish updateUI");
+    }
+
     @Override
     public void onInfoWindowClick(Marker marker) {
-        //TODO: normal action on click
-        Toast.makeText(this, "Info window clicked",
-                Toast.LENGTH_SHORT).show();
+        if (!marker.equals(mMarkerMe)) {
+            //click on a Meeting
+            changeFABState(FABState.EDIT_MEETING);
+        }
     }
 
     @Override
@@ -262,7 +400,12 @@ public class ActivityMaps extends AppCompatActivity implements
             if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY)) {
                 mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
             }
-            updateUI(true);
+
+            try {
+                updateUI(false);
+            } catch (IOException e) {
+                Log.d(TAG, e.getMessage());
+            }
         }
     }
 
@@ -296,15 +439,6 @@ public class ActivityMaps extends AppCompatActivity implements
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-    //Requests location updates from the FusedLocationApi.
-    protected void startLocationUpdates() {
-        // The final argument to {@code requestLocationUpdates()} is a LocationListener
-        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
-        Log.d(TAG, "startLocationUpdates");
-    }
-
     /**
      * Ensures that only one button is enabled at any time. The Start Updates button is enabled
      * if the user is not requesting location updates. The Stop Updates button is enabled if the
@@ -316,25 +450,6 @@ public class ActivityMaps extends AppCompatActivity implements
         } else {
             mFAB.setEnabled(true);
         }
-    }
-
-    //Updates the latitude, the longitude, and the last location time in the UI.
-    private void updateUI(Boolean initial) {
-        if (initial) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 13));
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(mCurrentLocation.getLatitude(),
-                            mCurrentLocation.getLongitude())) // Sets the center of the map to location user
-                    .zoom(CAMERA_ZOOM)          // Sets the zoom
-                    .bearing(CAMERA_BEARING)    // Sets the orientation of the camera to east
-                    .tilt(CAMERA_TILT)          // Sets the tilt of the camera to 30 degrees
-                    .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        }
-
-        mMarkerMe.setPosition(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
-        Log.d(TAG, "updateUI");
     }
 
     /**
@@ -391,20 +506,15 @@ public class ActivityMaps extends AppCompatActivity implements
         if (mCurrentLocation == null) {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-            updateUI(true);
+            try {
+                updateUI(false);
+            } catch (IOException e) {
+                Log.d(TAG, e.getMessage());
+            }
         }
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
-    }
-
-    //Callback that fires when the location changes.
-    @Override
-    public void onLocationChanged(Location location) {
-        mCurrentLocation = location;
-        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        updateUI(false);
-        Log.d(TAG, "Location Changed!");
     }
 
     @Override
@@ -461,4 +571,23 @@ public class ActivityMaps extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    public void changeFABState (FABState state) {
+        switch (state) {
+            case NEW_MEETING:
+                mFABState = FABState.NEW_MEETING;
+                mFAB.setBackgroundResource(R.drawable.notification_new_meeting);
+            case EDIT_MEETING:
+                mFABState = FABState.EDIT_MEETING;
+                mFAB.setBackgroundResource(R.drawable.notification_user_left_meeting);
+            case CANCEL_ADD_MEETING:
+                mFABState = FABState.CANCEL_ADD_MEETING;
+                mFAB.setBackgroundResource(R.drawable.chat);
+        }
+    }
+
+    private enum FABState {
+        NEW_MEETING,
+        EDIT_MEETING,
+        CANCEL_ADD_MEETING
+    }
 }

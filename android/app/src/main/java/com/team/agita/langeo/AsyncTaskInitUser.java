@@ -24,7 +24,7 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
 
     // Shared Preferences names
     private static final String SP_UNDEFINED = "undefined";
-    private static final String SP_EMAIL = "email";
+    private static final String SP_ID = "id";
     private static final String SP_SLIDESHOW = "slideShow";
     private static final String SP_IS_VISIBLE = "isVisible";
     private static final String SP_ID_ERROR = "isVisible";
@@ -58,10 +58,10 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
             myApiService = builder.build();
         }
 
-        String email = params[0];
+        String userID = params[0];
         SharedPreferences prefs = mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
-        String email_local = prefs.getString(SP_EMAIL, SP_UNDEFINED);
-        if (email_local.equals(SP_UNDEFINED)) {
+        String userIDLocal = prefs.getString(SP_ID, SP_UNDEFINED);
+        if (userIDLocal.equals(SP_UNDEFINED)) {
             Log.d(LOG, "undefined email_local");
             GetCurrentUserResponse gUser = null;
             try {
@@ -75,12 +75,12 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                 Log.d(LOG, "old user on new device");
                 LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
                         prefs.getBoolean(SP_IS_VISIBLE, gUser.getIsVisible()),
-                        prefs.getString(SP_EMAIL, SP_ID_ERROR));
+                        prefs.getString(SP_ID, SP_ID_ERROR));
 
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putString(SP_EMAIL, gUser.getEmail());
+                editor.putString(SP_ID, gUser.getEmail());
                 editor.putBoolean(SP_SLIDESHOW, false);
                 editor.putBoolean(SP_IS_VISIBLE, gUser.getIsVisible());
                 editor.commit();
@@ -101,7 +101,7 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                 Log.d(LOG, "successful registration");
                 LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, true),
                         prefs.getBoolean(SP_IS_VISIBLE, true),
-                        prefs.getString(SP_EMAIL, SP_ID_ERROR));
+                        prefs.getString(SP_ID, SP_ID_ERROR));
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
@@ -113,17 +113,17 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                 return 0;
             }
         } else {
-            Log.d(LOG,"Some email_local is stored on device!");
-            if (email.equals(email_local)) {
-                //standard Nth user email_local
+            Log.d(LOG,"Some id_local is stored on device!");
+            if (userID.equals(userIDLocal)) {
+                //standard Nth user login
                 LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
                         prefs.getBoolean(SP_IS_VISIBLE, true),
-                        prefs.getString(SP_EMAIL, SP_ID_ERROR));
+                        prefs.getString(SP_ID, SP_ID_ERROR));
                 Log.d(LOG, "standard Nth user email_local");
 
                 return 0;
             } else {
-                //re-email_local with a new user
+                //re-login with a new user
                 GetCurrentUserResponse user;
                 try {
                     user = myApiService.langeoAPI().getCurrentUser().execute();
@@ -133,12 +133,12 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                 }
                 LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
                         prefs.getBoolean(SP_IS_VISIBLE, true),
-                        prefs.getString(SP_EMAIL, SP_ID_ERROR));
+                        prefs.getString(SP_ID, SP_ID_ERROR));
                 Log.d(LOG, "re-email_local with a new user");
 
                 SharedPreferences.Editor editor =
                         mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putString(SP_EMAIL, user.getEmail());
+                editor.putString(SP_ID, user.getEmail());
                 editor.putBoolean(SP_SLIDESHOW, false);
                 editor.putBoolean(SP_IS_VISIBLE, user.getIsVisible());
                 editor.commit();

@@ -69,7 +69,7 @@ public class LocalUser{
 
         AsyncTaskInitUser task = new AsyncTaskInitUser(context);
         eMail = acct.getEmail();
-        task.execute(eMail);
+        task.execute(acct.getId());
     }
 
     public void setAchievementsReached(ArrayList<Integer> achievementsReached) {
