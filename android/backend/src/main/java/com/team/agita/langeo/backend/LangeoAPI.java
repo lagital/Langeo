@@ -121,6 +121,7 @@ public class LangeoAPI {
         public final Long id;
         public final String name;
         public final String location;
+        public final Coordinates coordinates;
         public final Long timestampFrom;
         public final Long timestampTo;
         public final Long ownerUserId;
@@ -130,6 +131,7 @@ public class LangeoAPI {
             this.id = meeting.getId();
             this.name = meeting.getName();
             this.location = meeting.getLocation();
+            this.coordinates = new Coordinates(meeting.getCoordinates());
             this.timestampFrom = meeting.getTimestampFrom();
             this.timestampTo = meeting.getTimestampTo();
             this.ownerUserId = meeting.getOwnerUserId();
@@ -148,6 +150,7 @@ public class LangeoAPI {
     public static class PostOrPutMeetingRequest implements Langeo.Changer<Langeo.MutableMeeting> {
         public String name;
         public String location;
+        public Coordinates coordinates;
         public Long timestampFrom;
         public Long timestampTo;
         public Long ownerUserId;
@@ -161,6 +164,14 @@ public class LangeoAPI {
             if (location != null) {
                 meeting.setLocation(location);
             }
+            if (coordinates != null) {
+                if (coordinates.latitude != null) {
+                    meeting.getCoordinates().setLatitude(coordinates.latitude);
+                }
+                if (coordinates.longitude != null) {
+                    meeting.getCoordinates().setLongitude(coordinates.longitude);
+                }
+            }
             if (timestampFrom != null) {
                 meeting.setTimestampFrom(timestampFrom);
             }
@@ -171,6 +182,19 @@ public class LangeoAPI {
             if (language != null) {
                 meeting.setLanguage(language);
             }
+        }
+    }
+
+    public static class Coordinates {
+        public Double latitude;
+        public Double longitude;
+
+        public Coordinates() {
+        }
+
+        public Coordinates(Langeo.Coordinates coordinates) {
+            this.latitude = coordinates.getLatitude();
+            this.longitude = coordinates.getLongitude();
         }
     }
 

@@ -143,6 +143,7 @@ public class Langeo {
         Long getId();
         String getName();
         String getLocation();
+        Coordinates getCoordinates();
         Long getTimestampFrom();
         Long getTimestampTo();
         Long getOwnerUserId();
@@ -152,10 +153,22 @@ public class Langeo {
     public interface MutableMeeting extends Meeting {
         void setName(String name);
         void setLocation(String location);
+        @Override MutableCoordinates getCoordinates();
         void setTimestampFrom(Long timestampFrom);
         void setTimestampTo(Long timestampTo);
         void setOwnerUserId(Long ownerUserId);
         void setLanguage(String language);
+    }
+
+
+    public interface Coordinates {
+        Double getLatitude();
+        Double getLongitude();
+    }
+
+    public interface MutableCoordinates extends Coordinates {
+        void setLatitude(Double latitude);
+        void setLongitude(Double longitude);
     }
 
 
@@ -279,6 +292,7 @@ public class Langeo {
         @Id private Long id;
         private String name;
         @Index private String location;
+        private MutableCoordinatesImpl coordinates;
         private Long timestampFrom;
         private Long timestampTo;
         private Long ownerUserId;
@@ -307,6 +321,14 @@ public class Langeo {
         @Override
         public void setLocation(String location) {
             this.location = location;
+        }
+
+        @Override
+        public MutableCoordinates getCoordinates() {
+            if (coordinates == null) {
+                coordinates = new MutableCoordinatesImpl();
+            }
+            return coordinates;
         }
 
         @Override
@@ -347,6 +369,32 @@ public class Langeo {
         @Override
         public void setLanguage(String language) {
             this.language = language;
+        }
+    }
+
+
+    private static class MutableCoordinatesImpl implements MutableCoordinates {
+        private Double latitude;
+        private Double longitude;
+
+        @Override
+        public Double getLatitude() {
+            return latitude;
+        }
+
+        @Override
+        public void setLatitude(Double latitude) {
+            this.latitude = latitude;
+        }
+
+        @Override
+        public Double getLongitude() {
+            return longitude;
+        }
+
+        @Override
+        public void setLongitude(Double longitude) {
+            this.longitude = longitude;
         }
     }
 }
