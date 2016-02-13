@@ -6,8 +6,10 @@
     <color name="blue_grey_800">#37474F</color>
     <color name="blue_grey_900">#263238</color>
     <color name="gold">#D4AF37</color>
-    <color name="fab_disabled">#D3D3D3</color>
-    <color name="fab_enabled">#FDB813</color>
     <color name="map_info_window">#212121</color>
     <color name="map_info_window_text">#fafafa</color>
+
+    <color name="fab_new_meeting">#66bb6a</color>
+    <color name="fab_edit_meeting">#ffa726</color>
+    <color name="fab_cancel">#ff7043</color>
 </resources>

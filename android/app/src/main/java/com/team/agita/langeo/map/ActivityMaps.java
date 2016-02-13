@@ -9,7 +9,6 @@ import android.location.Location;
 import com.appspot.id.app.langeo.Langeo;
 import com.appspot.id.app.langeo.model.Coordinates;
 import com.appspot.id.app.langeo.model.GetMeetingResponse;
-import com.appspot.id.app.langeo.model.GetMeetingsResponse;
 import com.appspot.id.app.langeo.model.PostOrPutMeetingRequest;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
@@ -34,6 +33,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -65,6 +65,7 @@ import com.team.agita.langeo.contacts.ActivityContacts;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -134,12 +135,17 @@ public class ActivityMaps extends AppCompatActivity implements
     private static Langeo myApiService = null;
     private Geocoder mGeoCoder;
     private Boolean mInitial = true;
-    private Boolean mMapForNewMeeting = false;
 
     private final String mClickOnTheMap = "Click on the map!";
 
-    public  List<GetMeetingResponse> mMeetings;
-    private List<Marker> mMeetMarkers;
+    public List<GetMeetingResponse> mMeetings;
+
+    //animations
+    Animation fab_open;
+    Animation fab_close;
+    Animation fab_rotate_forward;
+    Animation fab_rotate_backward;
+    Animation map_blink;
 
     private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
 
@@ -149,6 +155,11 @@ public class ActivityMaps extends AppCompatActivity implements
         setContentView(R.layout.activity_maps);
 
         Intent intent = getIntent();
+
+        fab_open =  AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+        fab_rotate_forward = AnimationUtils.loadAnimation(this, R.anim.fab_rotate_forward);
+        fab_rotate_backward = AnimationUtils.loadAnimation(this, R.anim.fab_rotate_backward);
 
         mGeoCoder = new Geocoder(this, Locale.getDefault());
         vMap = findViewById(R.id.map);
@@ -224,25 +235,25 @@ public class ActivityMaps extends AppCompatActivity implements
 
         mFAB = (FloatingActionButton) this.findViewById(R.id.fab);
         mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
-                (ActivityMaps.this, R.color.fab_disabled)));
+                (ActivityMaps.this, R.color.fab_new_meeting)));
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch (mFABState) {
                     case NEW_MEETING:
-                        //TODO: new Meeting addition
-                        mMapForNewMeeting = true;
+                        map_blink = new AlphaAnimation(1, 0);
+                        map_blink.setDuration(500); // duration - half a second
+                        map_blink.setInterpolator(new LinearInterpolator()); // do not alter animation rate
+                        map_blink.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
+                        map_blink.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
+                        vMap.startAnimation(map_blink);
                         Toast.makeText(ActivityMaps.this, mClickOnTheMap, Toast.LENGTH_SHORT).show();
-                        final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
-                        animation.setDuration(500); // duration - half a second
-                        animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
-                        animation.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
-                        animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
-                        vMap.startAnimation(animation);
+                        changeFABState(FABState.CANCEL_ADD_MEETING);
                     case EDIT_MEETING:
                         //TODO: Meeting edit
                     case CANCEL_ADD_MEETING:
-                        //TODO: Meeting add Cancellation
+                        changeFABState(FABState.NEW_MEETING);
+                        vMap.clearAnimation();
                 }
 
             }
@@ -274,10 +285,11 @@ public class ActivityMaps extends AppCompatActivity implements
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(final LatLng arg0) {
-                if (mMapForNewMeeting == true) {
+                if (mFABState == FABState.CANCEL_ADD_MEETING) {
                     Log.d(TAG, "OnMapClick to add Meeting");
-                    mMapForNewMeeting = false;
-                    vMap.clearAnimation();
+                    //vMap.clearAnimation();
+                    map_blink.cancel();
+                    changeFABState(FABState.NEW_MEETING);
                     PostOrPutMeetingRequest popmr = new PostOrPutMeetingRequest();
                     Coordinates c = new Coordinates();
                     c.setLatitude(arg0.latitude);
@@ -320,6 +332,7 @@ public class ActivityMaps extends AppCompatActivity implements
     public void updateUI(Boolean fromAsync) throws IOException {
         Log.d(TAG, "Start updateUI");
         if (mInitial) {
+            Log.d(TAG, "Initial Update");
             mInitial = false;
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 13));
@@ -333,7 +346,11 @@ public class ActivityMaps extends AppCompatActivity implements
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             List<Address> addresses = mGeoCoder.getFromLocation(mCurrentLocation.getLatitude(),
                     mCurrentLocation.getLongitude(), 1);
-            LocalUser.getInstance().setCityId(addresses.get(0).getLocality());
+            LocalUser.getInstance().setCityId(addresses.get(0).getAddressLine(1));
+            //LocalUser.getInstance().setCityId("TestTown");
+            Log.d(TAG, LocalUser.getInstance().getCityId());
+
+            mMeetings = new ArrayList<GetMeetingResponse>();
         }
 
         mMarkerMe.setPosition(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()));
@@ -352,9 +369,8 @@ public class ActivityMaps extends AppCompatActivity implements
                                     defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                             .visible(true));
                     tmp.setData(meeting);
-                    mMeetMarkers.add(tmp);
+                    //mMeetMarkers.add(tmp);
                 }
-
             }
         }
         Log.d(TAG, "finish updateUI");
@@ -385,7 +401,6 @@ public class ActivityMaps extends AppCompatActivity implements
             if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
                 mRequestingLocationUpdates = savedInstanceState.getBoolean(
                         REQUESTING_LOCATION_UPDATES_KEY);
-                setButtonsEnabledState();
             }
 
             // Update the value of mCurrentLocation from the Bundle and update the UI to show the
@@ -440,19 +455,6 @@ public class ActivityMaps extends AppCompatActivity implements
     }
 
     /**
-     * Ensures that only one button is enabled at any time. The Start Updates button is enabled
-     * if the user is not requesting location updates. The Stop Updates button is enabled if the
-     * user is requesting location updates.
-     */
-    private void setButtonsEnabledState() {
-        if (mRequestingLocationUpdates) {
-            mFAB.setEnabled(false);
-        } else {
-            mFAB.setEnabled(true);
-        }
-    }
-
-    /**
      * Removes location updates from the FusedLocationApi.
      */
     protected void stopLocationUpdates() {
@@ -474,8 +476,6 @@ public class ActivityMaps extends AppCompatActivity implements
         // location updates if the user has requested them.
 
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates) {
-            mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
-                    (ActivityMaps.this, R.color.fab_enabled)));
             startLocationUpdates();
         }
     }
@@ -574,14 +574,25 @@ public class ActivityMaps extends AppCompatActivity implements
     public void changeFABState (FABState state) {
         switch (state) {
             case NEW_MEETING:
+                if (mFABState == FABState.CANCEL_ADD_MEETING) {
+                    mFAB.startAnimation(fab_rotate_backward);
+                }
                 mFABState = FABState.NEW_MEETING;
-                mFAB.setBackgroundResource(R.drawable.notification_new_meeting);
+                mFAB.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.fab_add_meeting));
+                mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_new_meeting));
+                mFAB.jumpDrawablesToCurrentState();
             case EDIT_MEETING:
                 mFABState = FABState.EDIT_MEETING;
-                mFAB.setBackgroundResource(R.drawable.notification_user_left_meeting);
+                mFAB.startAnimation(fab_close);
+                mFAB.startAnimation(fab_open);
+                mFAB.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.fab_edit_meeting));
+                mFAB.jumpDrawablesToCurrentState();
             case CANCEL_ADD_MEETING:
                 mFABState = FABState.CANCEL_ADD_MEETING;
-                mFAB.setBackgroundResource(R.drawable.chat);
+                mFAB.startAnimation(fab_rotate_forward);
+                mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_cancel));
+                mFAB.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.fab_cancel));
+                mFAB.jumpDrawablesToCurrentState();
         }
     }
 

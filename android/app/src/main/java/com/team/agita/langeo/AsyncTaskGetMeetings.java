@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class AsyncTaskGetMeetings extends AsyncTask<Void, Void, List<GetMeetingResponse>> {
     private static final String LOG = "AsyncTaskGetMeetings";
-    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080";
+    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api/";
     private static final String SERVER_ADDRESS = "https://langeoapp.appspot.com/_ah/api/";
     private static final String CRED_ADDRESS = ":1-web-app.apps.googleusercontent.com";
 
@@ -45,7 +45,7 @@ public class AsyncTaskGetMeetings extends AsyncTask<Void, Void, List<GetMeetingR
         if (myApiService == null) {  // Only do this once
             Langeo.Builder builder;
             GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(mActivity,
-                    "server:client_id:814462762552-e30hbh2d4t6c45oh8sfn6l8ocp6i2gfm.apps.googleusercontent.com");
+                    "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com");
             credential.setSelectedAccountName(LocalUser.getInstance().eMail);
             if (BuildConfig.DEBUG) {
                 builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
@@ -67,11 +67,18 @@ public class AsyncTaskGetMeetings extends AsyncTask<Void, Void, List<GetMeetingR
         Log.d(LOG, "Finish doInBackground");
 
         try {
-            return myApiService.langeoAPI().getMeetings(LocalUser.getInstance().getCityId())
+            Log.d(LOG, "Search meetings for " + LocalUser.getInstance().getCityId());
+            List<GetMeetingResponse> responses = myApiService.langeoAPI()
+                    .getMeetings(LocalUser.getInstance().getCityId())
                     .execute().getMeetings();
+            if (responses != null) {
+                return responses;
+            } else {
+                return new ArrayList<GetMeetingResponse>();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            return new ArrayList<GetMeetingResponse>(){};
+            return new ArrayList<GetMeetingResponse>();
         }
     }
 

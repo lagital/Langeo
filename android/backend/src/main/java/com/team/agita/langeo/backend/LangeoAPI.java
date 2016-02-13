@@ -19,6 +19,9 @@ import static com.google.api.server.spi.config.ApiMethod.HttpMethod.PUT;
 @Api(
         name = "langeo",
         version = "v1",
+        clientIds = {"814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com",
+                "814462762552-e30hbh2d4t6c45oh8sfn6l8ocp6i2gfm.apps.googleusercontent.com"},
+        audiences = {"814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com"},
         scopes = "https://www.googleapis.com/auth/userinfo.email"
 )
 public class LangeoAPI {

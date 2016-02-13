@@ -26,7 +26,7 @@ public class AsyncTaskPostOrPutMeeting extends AsyncTask<PostOrPutMeetingRequest
     private static final String LOG = "AsyncTaskPostOrPut";
     private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
     private static final String SERVER_ADDRESS = "https://langeoapp.appspot.com/_ah/api/";
-    private static final String CRED_ADDRESS = ":1-web-app.apps.googleusercontent.com";
+    private static final String CRED_ADDRESS = "";
 
     private static Langeo myApiService = null;
     private Context mContext;
@@ -42,7 +42,7 @@ public class AsyncTaskPostOrPutMeeting extends AsyncTask<PostOrPutMeetingRequest
         if (myApiService == null) {  // Only do this once
             Langeo.Builder builder;
             GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(mActivity,
-                    "server:client_id:814462762552-e30hbh2d4t6c45oh8sfn6l8ocp6i2gfm.apps.googleusercontent.com");
+                    "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com");
             credential.setSelectedAccountName(LocalUser.getInstance().eMail);
             if (BuildConfig.DEBUG) {
                 builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
@@ -65,7 +65,6 @@ public class AsyncTaskPostOrPutMeeting extends AsyncTask<PostOrPutMeetingRequest
         PostOrPutMeetingRequest request = params[0];
         try {
             myApiService.langeoAPI().postMeeting(request).execute();
-            mActivity.updateUI(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,6 +75,11 @@ public class AsyncTaskPostOrPutMeeting extends AsyncTask<PostOrPutMeetingRequest
     @Override
     protected void onPostExecute(Void result)
     {
+        try {
+            mActivity.updateUI(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Log.d(LOG, "finish");
     }
 }

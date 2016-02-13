@@ -10,6 +10,7 @@ import com.appspot.id.app.langeo.model.GetCurrentUserResponse;
 import com.appspot.id.app.langeo.model.PutCurrentUserRequest;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import java.io.IOException;
@@ -21,6 +22,7 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
     private static final String LOG = "AsyncTaskInitUser";
     private static final String MY_PREFS_NAME = "LangeoPreferences";
     private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
+    private static final String SERVER_ADDRESS = "https://langeoapp.appspot.com/_ah/api/";
 
     // Shared Preferences names
     private static final String SP_UNDEFINED = "undefined";
@@ -41,9 +43,12 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
     protected Integer doInBackground(String... params) {
         if (myApiService == null) {  // Only do this once
             Langeo.Builder builder;
+            GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(mContext,
+                    "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com");
+            credential.setSelectedAccountName(LocalUser.getInstance().eMail);
             if (BuildConfig.DEBUG) {
                 builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
-                        new AndroidJsonFactory(), null)
+                        new AndroidJsonFactory(), credential)
                         .setRootUrl(LOCAL_ADDRESS)
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
@@ -52,8 +57,9 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
                             }
                         });
             } else {
-                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
-                        .setRootUrl("https://langeoapp.appspot.com/_ah/api/");
+                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(), credential)
+                        .setRootUrl(SERVER_ADDRESS);
             }
             myApiService = builder.build();
         }
@@ -62,13 +68,13 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
         SharedPreferences prefs = mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
         String userIDLocal = prefs.getString(SP_ID, SP_UNDEFINED);
         if (userIDLocal.equals(SP_UNDEFINED)) {
-            Log.d(LOG, "undefined email_local");
+            Log.d(LOG, "undefined login");
             GetCurrentUserResponse gUser = null;
             try {
                 gUser = myApiService.langeoAPI().getCurrentUser().execute();
             } catch (IOException e) {
                 Log.d(LOG, "IOException " + e.getMessage());
-                return 1;
+                gUser = null;
             }
             if (gUser != null) {
                 //old user on new device
