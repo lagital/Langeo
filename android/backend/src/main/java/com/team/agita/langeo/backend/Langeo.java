@@ -12,9 +12,9 @@ import static com.googlecode.objectify.ObjectifyService.factory;
 import static com.googlecode.objectify.ObjectifyService.ofy;
 import static java.lang.String.format;
 
-// TODO: transactions
-// TODO: remove double-code
-// TODO: tests
+// TODO: транзакции
+// TODO: убрать дублирование кода
+// TODO: тесты?
 public class Langeo {
     static {
         JodaTimeTranslators.add(factory());
