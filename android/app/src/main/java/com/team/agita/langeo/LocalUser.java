@@ -2,10 +2,11 @@ package com.team.agita.langeo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.v4.util.Pair;
 
 import com.appspot.id.app.langeo.model.Coordinates;
-import com.appspot.id.app.langeo.model.User;
+import com.appspot.id.app.langeo.model.GetCurrentUserResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ public class LocalUser{
     private static String MY_PREFS_NAME = "LangeoPreferences";
     private static SharedPreferences prefs;
 
-    public Integer initialized = 0;
+    public Boolean initialized = false;
     public ArrayList<Integer> achievementsReached = new ArrayList<Integer>();
-    public String id = "0";
+    public Long id = null;
     public String eMail = "example@email.com";
     public Coordinates coordinates;
     public Boolean isVisible = true;
@@ -48,17 +49,16 @@ public class LocalUser{
         task.execute();
     }
 
-    public void fill(Boolean showSlides,Boolean isVisible, String id) {
+    public void fill(String eMail, Boolean showSlides, Boolean isVisible) {
         mUser.setShowSlides(showSlides);
         mUser.setIsVisible(isVisible);
-        mUser.setId(id);
+        mUser.seteMail(eMail);
     }
 
-    public User extractAPIUser() {
-        User user = new User();
+    public GetCurrentUserResponse extractAPIUser() {
+        GetCurrentUserResponse user = new GetCurrentUserResponse();
         user.setIsVisible(isVisible);
         user.setId(id);
-        user.setCoordinates(coordinates);
         return user;
     }
 
@@ -68,8 +68,7 @@ public class LocalUser{
         achievementsReached.add(2);
 
         AsyncTaskInitUser task = new AsyncTaskInitUser(context);
-        eMail = acct.getEmail();
-        task.execute(acct.getId());
+        task.execute(acct.getEmail());
     }
 
     public void setAchievementsReached(ArrayList<Integer> achievementsReached) {
@@ -80,11 +79,11 @@ public class LocalUser{
         achievementsReached.add(number);
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -120,11 +119,11 @@ public class LocalUser{
         this.showSlides = showSlides;
     }
 
-    public Integer getInitialized() {
+    public Boolean getInitialized() {
         return initialized;
     }
 
-    public void setInitialized(Integer initialized) {
+    public void setInitialized(Boolean initialized) {
         this.initialized = initialized;
     }
 
@@ -148,4 +147,11 @@ public class LocalUser{
         this.cityId = cityId;
     }
 
+    public String geteMail() {
+        return eMail;
+    }
+
+    public void seteMail(String eMail) {
+        this.eMail = eMail;
+    }
 }

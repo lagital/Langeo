@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 
-import com.appspot.id.app.langeo.model.User;
+import com.appspot.id.app.langeo.model.GetCurrentUserResponse;
 import com.team.agita.langeo.R;
 import com.team.agita.langeo.map.ActivityMaps;
 
@@ -40,7 +40,7 @@ public class NotificationManager extends IntentService {
     }
 
     //TODO: Meeting meeting and Chat chat as input optional parms:
-    public void createNotification (User user, Integer notificationType) {
+    public void createNotification (GetCurrentUserResponse user, Integer notificationType) {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this);

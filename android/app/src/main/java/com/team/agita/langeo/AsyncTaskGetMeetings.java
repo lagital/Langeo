@@ -27,10 +27,10 @@ import java.util.List;
  * Created by agita on 09.01.16.
  */
 public class AsyncTaskGetMeetings extends AsyncTask<Void, Void, List<GetMeetingResponse>> {
-    private static final String LOG = "AsyncTaskGetMeetings";
-    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api/";
-    private static final String SERVER_ADDRESS = "https://langeoapp.appspot.com/_ah/api/";
-    private static final String CRED_ADDRESS = ":1-web-app.apps.googleusercontent.com";
+    private static final String LOG             = "AsyncTaskGetMeetings";
+    private static final String AUDIENCE        = "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com";
+    private static final String SERVER_ADDRESS  = "https://langeoapp.appspot.com/_ah/api/";
+    private static final String CRED_ADDRESS    = ":1-web-app.apps.googleusercontent.com";
 
     private static Langeo myApiService = null;
     private ActivityMaps mActivity;
@@ -45,12 +45,14 @@ public class AsyncTaskGetMeetings extends AsyncTask<Void, Void, List<GetMeetingR
         if (myApiService == null) {  // Only do this once
             Langeo.Builder builder;
             GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(mActivity,
-                    "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com");
+                    AUDIENCE);
             credential.setSelectedAccountName(LocalUser.getInstance().eMail);
             if (BuildConfig.DEBUG) {
                 builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(), credential)
-                        .setRootUrl(LOCAL_ADDRESS)
+                        .setRootUrl(mActivity.getResources().getString(R.string.local_server_ip) +
+                                mActivity.getResources().getString(R.string.local_server_port))
+                        .setApplicationName(mActivity.getResources().getString(R.string.app_name))
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
                             public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -58,7 +60,8 @@ public class AsyncTaskGetMeetings extends AsyncTask<Void, Void, List<GetMeetingR
                             }
                         });
             } else {
-                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), credential)
+                builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(), credential)
                         .setRootUrl(SERVER_ADDRESS);
             }
             myApiService = builder.build();

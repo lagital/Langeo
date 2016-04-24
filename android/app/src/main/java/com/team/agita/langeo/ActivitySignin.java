@@ -2,7 +2,9 @@ package com.team.agita.langeo;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -33,12 +35,16 @@ public class ActivitySignin extends AppCompatActivity implements
     private static final String SLIDE_SHOW_START = "com.team.agita.langeo.RUN_SLIDE_SHOW";
     private static final String MAP_START = "com.team.agita.langeo.RUN_MAP";
     private static final int RC_SIGN_IN = 9001;
-    private static final String SIGNIN_START = "com.team.agita.langeo.RUN_SIGNIN";
+    private static final String USER_LOGOUT = "com.team.agita.langeo.LOGOUT";
+    private static final String USER_INITIALIZATION_ERROR = "Sorry, there are problems with connection." +
+            "\n Please, try again.";
 
     private GoogleApiClient mGoogleApiClient;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
-    private Boolean mNoSilentLogin = false;
+    private Boolean mUserLogout = false;
+    private Boolean mWaited = false;
+    GoogleSignInAccount mAcct;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +60,9 @@ public class ActivitySignin extends AppCompatActivity implements
         findViewById(R.id.go_to_app).setOnClickListener(this);
 
         Intent intent = getIntent();
-        if (intent.hasExtra(SIGNIN_START)){
-            mNoSilentLogin = true;
+        if (intent.hasExtra(USER_LOGOUT)){
+            Log.d(TAG, "onCreate - " + "user returned for Sign Out");
+            mUserLogout = true;
         }
 
         // [START configure_signin]
@@ -93,25 +100,27 @@ public class ActivitySignin extends AppCompatActivity implements
     public void onStart() {
         super.onStart();
 
-        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (opr.isDone()) {
-            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
-            // and the GoogleSignInResult will be available instantly.
-            Log.d(TAG, "Got cached sign-in");
-            GoogleSignInResult result = opr.get();
-            handleSignInResult(result);
-        } else {
-            // If the user has not previously signed in on this device or the sign-in has expired,
-            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
-            // single sign-on will occur in this branch.
-            showProgressDialog();
-            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
-                    hideProgressDialog();
-                    handleSignInResult(googleSignInResult);
-                }
-            });
+        if (!mUserLogout) {
+            OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+            if (opr.isDone()) {
+                // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+                // and the GoogleSignInResult will be available instantly.
+                Log.d(TAG, "Got cached sign-in");
+                GoogleSignInResult result = opr.get();
+                handleSignInResult(result);
+            } else {
+                // If the user has not previously signed in on this device or the sign-in has expired,
+                // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+                // single sign-on will occur in this branch.
+                showProgressDialog();
+                opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                    @Override
+                    public void onResult(GoogleSignInResult googleSignInResult) {
+                        hideProgressDialog();
+                        handleSignInResult(googleSignInResult);
+                    }
+                });
+            }
         }
     }
 
@@ -131,16 +140,15 @@ public class ActivitySignin extends AppCompatActivity implements
     // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
+        if (result.isSuccess() && !mUserLogout) {
             // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            if (!mNoSilentLogin) {
-                LocalUser.getInstance().initialize(this, acct);
-            }
-            Log.d(TAG, "Successfull login");
+            mAcct = result.getSignInAccount();
 
-            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+            LocalUser.getInstance().initialize(this, mAcct);
+            mStatusTextView.setText(getString(R.string.signed_in_fmt, mAcct.getDisplayName()));
+            showProgressDialog();
             updateUI(true);
+            hideProgressDialog();
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
@@ -150,7 +158,6 @@ public class ActivitySignin extends AppCompatActivity implements
 
     // [START signIn]
     private void signIn() {
-        mNoSilentLogin = false;
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
@@ -209,42 +216,26 @@ public class ActivitySignin extends AppCompatActivity implements
 
     private void updateUI(boolean signedIn) {
         if (signedIn) {
-            switch (LocalUser.getInstance().getInitialized()) {
-                case 0:
-                    if (mNoSilentLogin) {
-                        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-                        findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-                    } else if (LocalUser.getInstance().getShowSlides()) {
-                        Intent intent = new Intent(this, ActivitySlideShow.class);
-                        intent.putExtra(SLIDE_SHOW_START, true);
-                        startActivity(intent);
-                    } else {
-                        Intent intent = new Intent(this, ActivityMaps.class);
-                        intent.putExtra(MAP_START, true);
-                        startActivity(intent);
-                    }
-                    break;
-                case 1:
-                    findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-                    findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-                    findViewById(R.id.go_to_app).setVisibility(View.GONE);
-                    Toast.makeText(this, R.string.server_unavailable, Toast.LENGTH_SHORT).show();
-                    break;
-                case 2:
-                    findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-                    findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-                    findViewById(R.id.go_to_app).setVisibility(View.GONE);
-                    Toast.makeText(this, R.string.server_error_new_user, Toast.LENGTH_SHORT).show();
-                case 3:
-                    findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-                    findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-                    findViewById(R.id.go_to_app).setVisibility(View.GONE);
-                    Toast.makeText(this, R.string.server_error_unknown, Toast.LENGTH_SHORT).show();
+            if (!LocalUser.getInstance().getInitialized()) {
+                if (!LocalUser.getInstance().getInitialized()) {
+                    Toast.makeText(this, USER_INITIALIZATION_ERROR, Toast.LENGTH_SHORT).show();
+                }
+            } else if (LocalUser.getInstance().getShowSlides()) {
+                Log.d(TAG, LocalUser.getInstance().getInitialized().toString());
+                Log.d(TAG, LocalUser.getInstance().getShowSlides().toString());
+                Intent intent = new Intent(this, ActivitySlideShow.class);
+                intent.putExtra(SLIDE_SHOW_START, true);
+                startActivity(intent);
+                finish();
+            } else {
+                Intent intent = new Intent(this, ActivityMaps.class);
+                intent.putExtra(MAP_START, true);
+                startActivity(intent);
+                finish();
             }
         } else {
             mStatusTextView.setText(R.string.signed_out);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
         }
     }
 
@@ -252,14 +243,14 @@ public class ActivitySignin extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
+                if (mUserLogout) {
+                    signOut();
+                    mUserLogout = false;
+                }
                 signIn();
                 break;
             case R.id.sign_out_button:
                 signOut();
-                break;
-            case R.id.go_to_app:
-                mNoSilentLogin = false;
-                updateUI(true);
                 break;
         }
     }

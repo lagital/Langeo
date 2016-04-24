@@ -12,4 +12,13 @@
     <color name="fab_new_meeting">#66bb6a</color>
     <color name="fab_edit_meeting">#ffa726</color>
     <color name="fab_cancel">#ff7043</color>
+
+    <color name="dark_primary">#00796B</color>
+    <color name="primary">#009688</color>
+    <color name="light_primary">#B2DFDB</color>
+    <color name="text_icons">#FFFFFF</color>
+    <color name="accent">#607D8B</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#727272</color>
+    <color name="divider">#B6B6B6</color>
 </resources>

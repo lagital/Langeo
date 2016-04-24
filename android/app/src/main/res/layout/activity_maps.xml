@@ -37,7 +37,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/dark_primary"
                 android:elevation="4dp"
                 android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
@@ -48,6 +48,8 @@
                 android:scaleType="center"
                 android:src="@drawable/fab_add_meeting"
                 android:elevation="4dp"
+                android:background="@color/accent"
+                android:backgroundTint="@color/accent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 

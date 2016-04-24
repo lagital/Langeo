@@ -4,6 +4,10 @@
     <string name="contacts_act_name">Contacts</string>
     <string name="profile_act_name">Profile</string>
 
+    <!--LOCAL SERVER CREDENTIALS-->
+    <string name="local_server_ip">http://192.168.100.2</string>
+    <string name="local_server_port">:8080/_ah/api</string>
+
     <!-- Sign-in status messages -->
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_in">Signed in</string>

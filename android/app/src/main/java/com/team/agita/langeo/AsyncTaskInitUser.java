@@ -14,42 +14,50 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import java.io.IOException;
+import java.sql.Time;
 
 /**
  * Created by agita on 09.01.16.
  */
-class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
-    private static final String LOG = "AsyncTaskInitUser";
-    private static final String MY_PREFS_NAME = "LangeoPreferences";
-    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
+class AsyncTaskInitUser extends AsyncTask<String, Void, Void> {
+    private static final String TAG = "SyncTaskInitUser";
+    private static final String MY_PREFS_NAME = "com.team.agita.langeo.preferences";
     private static final String SERVER_ADDRESS = "https://langeoapp.appspot.com/_ah/api/";
+    private static final String AUDIENCE = "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com";
 
     // Shared Preferences names
-    private static final String SP_UNDEFINED = "undefined";
-    private static final String SP_ID = "id";
+    private static final String SP_UNDEFINED = "u";
+    private static final String SP_EMAIL = "email";
     private static final String SP_SLIDESHOW = "slideShow";
     private static final String SP_IS_VISIBLE = "isVisible";
-    private static final String SP_ID_ERROR = "isVisible";
-
 
     private static Langeo myApiService = null;
-    private Context mContext;
 
-    public AsyncTaskInitUser(Context context){
+    private Context mContext;
+    private String eMail;
+    private String eMailLocal;
+    private SharedPreferences mPrefs;
+    private SharedPreferences.Editor mPrefsEditor;
+
+    public AsyncTaskInitUser(Context context) {
         mContext = context;
     }
 
     @Override
-    protected Integer doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
+        eMail = params[0];
+
         if (myApiService == null) {  // Only do this once
             Langeo.Builder builder;
             GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(mContext,
-                    "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com");
-            credential.setSelectedAccountName(LocalUser.getInstance().eMail);
+                    AUDIENCE);
+            credential.setSelectedAccountName(eMail);
             if (BuildConfig.DEBUG) {
                 builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(), credential)
-                        .setRootUrl(LOCAL_ADDRESS)
+                        .setRootUrl(mContext.getResources().getString(R.string.local_server_ip) +
+                                mContext.getResources().getString(R.string.local_server_port))
+                        .setApplicationName(mContext.getResources().getString(R.string.app_name))
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
                             public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -64,100 +72,100 @@ class AsyncTaskInitUser extends AsyncTask<String, Void, Integer> {
             myApiService = builder.build();
         }
 
-        String userID = params[0];
-        SharedPreferences prefs = mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
-        String userIDLocal = prefs.getString(SP_ID, SP_UNDEFINED);
-        if (userIDLocal.equals(SP_UNDEFINED)) {
-            Log.d(LOG, "undefined login");
-            GetCurrentUserResponse gUser = null;
+        mPrefs = mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE);
+        mPrefsEditor = mPrefs.edit();
+
+        eMailLocal = mPrefs.getString(SP_EMAIL, SP_UNDEFINED);
+        if (eMailLocal.equals("u")) {
+            Log.d(TAG, "undefined login");
+            GetCurrentUserResponse gUser;
             try {
                 gUser = myApiService.langeoAPI().getCurrentUser().execute();
             } catch (IOException e) {
-                Log.d(LOG, "IOException " + e.getMessage());
+                Log.d(TAG, "IOException " + e.getMessage());
+                e.printStackTrace();
                 gUser = null;
             }
+
             if (gUser != null) {
-                //old user on new device
-                Log.d(LOG, "old user on new device");
-                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
-                        prefs.getBoolean(SP_IS_VISIBLE, gUser.getIsVisible()),
-                        prefs.getString(SP_ID, SP_ID_ERROR));
-
-
-                SharedPreferences.Editor editor =
-                        mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putString(SP_ID, gUser.getEmail());
-                editor.putBoolean(SP_SLIDESHOW, false);
-                editor.putBoolean(SP_IS_VISIBLE, gUser.getIsVisible());
-                editor.commit();
-
-                return 0;
+                //old user on a new device
+                Log.d(TAG, "old user on a new device");
+                LocalUser.getInstance().fill(eMail, false, gUser.getIsVisible());
+                fillPreferences(eMail, false, gUser.getIsVisible());
+                LocalUser.getInstance().setInitialized(true);
             } else {
                 //new user
-                PutCurrentUserRequest pUser = new PutCurrentUserRequest();
-                Log.d(LOG, "new user");
-                try {
-                    pUser.setIsVisible(true);
-                    myApiService.langeoAPI().putCurrentUser(pUser).execute();
-                } catch (IOException e) {
-                    Log.d(LOG, "IOException " + e.getMessage());
-                    return 2;
-                }
-                // successful registration
-                Log.d(LOG, "successful registration");
-                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, true),
-                        prefs.getBoolean(SP_IS_VISIBLE, true),
-                        prefs.getString(SP_ID, SP_ID_ERROR));
-
-                SharedPreferences.Editor editor =
-                        mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putBoolean("slideShow", true);
-                //editor.putString(SP_ID, pUser.get);
-                editor.putBoolean(SP_IS_VISIBLE, true);
-                editor.commit();
-
-                return 0;
+                LocalUser.getInstance().setInitialized(registerUser());
             }
         } else {
-            Log.d(LOG,"Some id_local is stored on device!");
-            if (userID.equals(userIDLocal)) {
-                //standard Nth user login
-                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
-                        prefs.getBoolean(SP_IS_VISIBLE, true),
-                        prefs.getString(SP_ID, SP_ID_ERROR));
-                Log.d(LOG, "standard Nth user email_local");
-
-                return 0;
+            Log.d(TAG, "Some email is stored on device!");
+            if (eMail.equals(eMailLocal)) {
+                //standard user login
+                LocalUser.getInstance().fill(
+                        mPrefs.getString(SP_EMAIL, SP_UNDEFINED),
+                        mPrefs.getBoolean(SP_SLIDESHOW, false),
+                        mPrefs.getBoolean(SP_IS_VISIBLE, true));
+                Log.d(TAG, "standard user log in");
+                LocalUser.getInstance().setInitialized(true);
             } else {
                 //re-login with a new user
-                GetCurrentUserResponse user;
+                Log.d(TAG, "re-login with a new user - " + eMail + " != " + eMailLocal);
+                GetCurrentUserResponse gUser;
                 try {
-                    user = myApiService.langeoAPI().getCurrentUser().execute();
+                    gUser = myApiService.langeoAPI().getCurrentUser().execute();
                 } catch (IOException e) {
-                    Log.d(LOG, "IOException " + e.getMessage());
-                    return 1;
+                    Log.d(TAG, "IOException " + e.getMessage());
+                    clearPreferences();
+                    gUser = null;
                 }
-                LocalUser.getInstance().fill(prefs.getBoolean(SP_SLIDESHOW, false),
-                        prefs.getBoolean(SP_IS_VISIBLE, true),
-                        prefs.getString(SP_ID, SP_ID_ERROR));
-                Log.d(LOG, "re-email_local with a new user");
-
-                SharedPreferences.Editor editor =
-                        mContext.getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
-                editor.putString(SP_ID, user.getEmail());
-                editor.putBoolean(SP_SLIDESHOW, false);
-                editor.putBoolean(SP_IS_VISIBLE, user.getIsVisible());
-                editor.commit();
-
-                return 0;
+                if (gUser != null) {
+                    LocalUser.getInstance().fill(
+                            gUser.getEmail(),
+                            false,
+                            gUser.getIsVisible());
+                    fillPreferences(gUser.getEmail(), false, gUser.getIsVisible());
+                    LocalUser.getInstance().setInitialized(true);
+                } else {
+                    //new user
+                    LocalUser.getInstance().setInitialized(registerUser());
+                }
             }
         }
+        return null;
     }
 
-    @Override
-    protected void onPostExecute(Integer result)
-    {
-        LocalUser.getInstance().setInitialized(result);
-        Log.d(LOG, "finish");
+
+    private void fillPreferences (String eMail, Boolean slideshow, Boolean isVisible) {
+        mPrefsEditor.putString(SP_EMAIL, eMail);
+        mPrefsEditor.putBoolean(SP_SLIDESHOW, slideshow);
+        mPrefsEditor.putBoolean(SP_IS_VISIBLE, isVisible);
+        mPrefsEditor.commit();
+    }
+
+    private void clearPreferences () {
+        mPrefsEditor.putString(SP_EMAIL, "u");
+        mPrefsEditor.putBoolean(SP_SLIDESHOW, true);
+        mPrefsEditor.putBoolean(SP_IS_VISIBLE, true);
+        mPrefsEditor.commit();
+    }
+
+    private Boolean registerUser () {
+        //new user
+        Log.d(TAG, "new user");
+        PutCurrentUserRequest pUser = new PutCurrentUserRequest();
+        pUser.setIsVisible(true);
+        try {
+            myApiService.langeoAPI().putCurrentUser(pUser).execute();
+        } catch (IOException e) {
+            Log.d(TAG, "IOException " + e.getMessage());
+            return false;
+        }
+
+        // successful registration
+        Log.d(TAG, "successful registration");
+        LocalUser.getInstance().fill(eMail, true, true);
+        fillPreferences(eMail, true, true);
+
+        return true;
     }
 }

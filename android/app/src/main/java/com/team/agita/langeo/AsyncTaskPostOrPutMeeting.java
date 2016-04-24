@@ -1,15 +1,11 @@
 package com.team.agita.langeo;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.appspot.id.app.langeo.Langeo;
-import com.appspot.id.app.langeo.model.GetCurrentUserResponse;
 import com.appspot.id.app.langeo.model.PostOrPutMeetingRequest;
-import com.appspot.id.app.langeo.model.PutCurrentUserRequest;
-import com.appspot.id.app.langeo.model.User;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -24,12 +20,11 @@ import java.io.IOException;
  */
 public class AsyncTaskPostOrPutMeeting extends AsyncTask<PostOrPutMeetingRequest, Void, Void> {
     private static final String LOG = "AsyncTaskPostOrPut";
-    private static final String LOCAL_ADDRESS = "http://192.168.100.9:8080/_ah/api";
+    private static final String AUDIENCE        = "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com";
     private static final String SERVER_ADDRESS = "https://langeoapp.appspot.com/_ah/api/";
     private static final String CRED_ADDRESS = "";
 
     private static Langeo myApiService = null;
-    private Context mContext;
     private ActivityMaps mActivity;
 
     public AsyncTaskPostOrPutMeeting(ActivityMaps activity){
@@ -42,12 +37,14 @@ public class AsyncTaskPostOrPutMeeting extends AsyncTask<PostOrPutMeetingRequest
         if (myApiService == null) {  // Only do this once
             Langeo.Builder builder;
             GoogleAccountCredential credential = GoogleAccountCredential.usingAudience(mActivity,
-                    "server:client_id:814462762552-kjl0ijdqfjf5q90p4p98g0cun3vjt557.apps.googleusercontent.com");
+                    AUDIENCE);
             credential.setSelectedAccountName(LocalUser.getInstance().eMail);
             if (BuildConfig.DEBUG) {
                 builder = new Langeo.Builder(AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(), credential)
-                        .setRootUrl(LOCAL_ADDRESS)
+                        .setRootUrl(mActivity.getResources().getString(R.string.local_server_ip) +
+                                mActivity.getResources().getString(R.string.local_server_port))
+                        .setApplicationName(mActivity.getResources().getString(R.string.app_name))
                         .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                             @Override
                             public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {

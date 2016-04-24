@@ -81,7 +81,7 @@ public class ActivityMaps extends AppCompatActivity implements
     private static final String ACHIEVEMENTS_START = "com.team.agita.langeo.RUN_ACHIEVEMENTS";
     private static final String CONTACTS_START = "com.team.agita.langeo.RUN_CONTACTS";
     private static final String PROFILE_START = "com.team.agita.langeo.RUN_PROFILE";
-    private static final String SIGNIN_START = "com.team.agita.langeo.RUN_SIGNIN";
+    private static final String USER_LOGOUT = "com.team.agita.langeo.LOGOUT";;
 
     //The desired interval for location updates. Inexact. Updates may be more or less frequent.
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
@@ -234,8 +234,6 @@ public class ActivityMaps extends AppCompatActivity implements
         t.setText(Html.fromHtml(getString(R.string.hello)));
 
         mFAB = (FloatingActionButton) this.findViewById(R.id.fab);
-        mFAB.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor
-                (ActivityMaps.this, R.color.fab_new_meeting)));
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -564,7 +562,7 @@ public class ActivityMaps extends AppCompatActivity implements
             case R.id.action_signout:
                 // Go to signin.
                 Intent sintent = new Intent(this, ActivitySignin.class);
-                sintent.putExtra(SIGNIN_START, true);
+                sintent.putExtra(USER_LOGOUT, true);
                 startActivity(sintent);
                 return true;
         }
