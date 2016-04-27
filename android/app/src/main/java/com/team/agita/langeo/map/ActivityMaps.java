@@ -53,6 +53,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.androidmapsextensions.Marker;
 import com.androidmapsextensions.MarkerOptions;
+import com.team.agita.langeo.ActivityEditMeeting;
 import com.team.agita.langeo.ActivityProfile;
 import com.team.agita.langeo.ActivitySignin;
 import com.team.agita.langeo.AsyncTaskGetMeetings;
@@ -64,6 +65,7 @@ import com.team.agita.langeo.achievements.ActivityAchievements;
 import com.team.agita.langeo.contacts.ActivityContacts;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +83,11 @@ public class ActivityMaps extends AppCompatActivity implements
     private static final String ACHIEVEMENTS_START = "com.team.agita.langeo.RUN_ACHIEVEMENTS";
     private static final String CONTACTS_START = "com.team.agita.langeo.RUN_CONTACTS";
     private static final String PROFILE_START = "com.team.agita.langeo.RUN_PROFILE";
-    private static final String USER_LOGOUT = "com.team.agita.langeo.LOGOUT";;
+    private static final String USER_LOGOUT = "com.team.agita.langeo.LOGOUT";
+
+    private final Integer ADD_MEETING_REQUEST_CODE  = 5;
+    private final Integer EDIT_MEETING_REQUEST_CODE = 3;
+    private final String  ACTIVITY_EDIT_MEETING     = "com.team.agita.langeo.ActivityEditMeeting";
 
     //The desired interval for location updates. Inexact. Updates may be more or less frequent.
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
@@ -239,12 +245,6 @@ public class ActivityMaps extends AppCompatActivity implements
             public void onClick(View v) {
                 switch (mFABState) {
                     case NEW_MEETING:
-                        map_blink = new AlphaAnimation(1, 0);
-                        map_blink.setDuration(500); // duration - half a second
-                        map_blink.setInterpolator(new LinearInterpolator()); // do not alter animation rate
-                        map_blink.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
-                        map_blink.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
-                        vMap.startAnimation(map_blink);
                         Toast.makeText(ActivityMaps.this, mClickOnTheMap, Toast.LENGTH_SHORT).show();
                         changeFABState(FABState.CANCEL_ADD_MEETING);
                     case EDIT_MEETING:
@@ -284,19 +284,12 @@ public class ActivityMaps extends AppCompatActivity implements
             @Override
             public void onMapClick(final LatLng arg0) {
                 if (mFABState == FABState.CANCEL_ADD_MEETING) {
-                    Log.d(TAG, "OnMapClick to add Meeting");
-                    //vMap.clearAnimation();
-                    map_blink.cancel();
+                    Log.d(TAG, "OnMapClick  to add Meeting");
+                    Intent intent = new Intent(ACTIVITY_EDIT_MEETING);
+                    intent.putExtra(ActivityEditMeeting.meetingLatitude, arg0.latitude);
+                    intent.putExtra(ActivityEditMeeting.meetingLongitude, arg0.longitude);
+                    startActivityForResult(intent, ADD_MEETING_REQUEST_CODE);
                     changeFABState(FABState.NEW_MEETING);
-                    PostOrPutMeetingRequest popmr = new PostOrPutMeetingRequest();
-                    Coordinates c = new Coordinates();
-                    c.setLatitude(arg0.latitude);
-                    c.setLongitude(arg0.longitude);
-                    popmr.setCoordinates(c);
-                    popmr.setName("Test!");
-                    popmr.setLocation(LocalUser.getInstance().getCityId());
-                    AsyncTaskPostOrPutMeeting task = new AsyncTaskPostOrPutMeeting(ActivityMaps.this);
-                    task.execute(popmr);
                 }
             }
         });
@@ -569,6 +562,28 @@ public class ActivityMaps extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EDIT_MEETING_REQUEST_CODE && resultCode == RESULT_OK) {
+            PostOrPutMeetingRequest popmr = new PostOrPutMeetingRequest();
+            Coordinates c = new Coordinates();
+            c.setLatitude(data.getDoubleExtra(ActivityEditMeeting.meetingLatitude, 0.0));
+            c.setLongitude(data.getDoubleExtra(ActivityEditMeeting.meetingLongitude, 0.0));
+            popmr.setCoordinates(c);
+            popmr.setName(data.getStringExtra(ActivityEditMeeting.meetingTitle));
+            popmr.setLocation(LocalUser.getInstance().getCityId());
+            popmr.setLanguage(data.getStringExtra(ActivityEditMeeting.meetingLanguage));
+            //TODO:
+            //popmr.setTimestampFrom(Time.parse()data.getIntExtra(meetingTimeHour));
+            //popmr.setTimestampTo()
+            //ask for Description, Lang level and Date
+            AsyncTaskPostOrPutMeeting task = new AsyncTaskPostOrPutMeeting(ActivityMaps.this);
+            task.execute(popmr);
+        }
+    }
+
     public void changeFABState (FABState state) {
         switch (state) {
             case NEW_MEETING:
@@ -577,7 +592,6 @@ public class ActivityMaps extends AppCompatActivity implements
                 }
                 mFABState = FABState.NEW_MEETING;
                 mFAB.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.fab_add_meeting));
-                mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_new_meeting));
                 mFAB.jumpDrawablesToCurrentState();
             case EDIT_MEETING:
                 mFABState = FABState.EDIT_MEETING;
@@ -588,7 +602,6 @@ public class ActivityMaps extends AppCompatActivity implements
             case CANCEL_ADD_MEETING:
                 mFABState = FABState.CANCEL_ADD_MEETING;
                 mFAB.startAnimation(fab_rotate_forward);
-                mFAB.setBackgroundColor(ContextCompat.getColor(ActivityMaps.this, R.color.fab_cancel));
                 mFAB.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.fab_cancel));
                 mFAB.jumpDrawablesToCurrentState();
         }

@@ -1,134 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+
+<ScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@color/primary">
 
-        <TextView
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/meeting_title"
-            android:id="@+id/meeting_title"
-            android:textColor="@color/primary_text"
-            android:labelFor="@+id/meeting_title_edit"
-            android:textSize="@dimen/activity_section_title_size"
-            android:textAlignment="center"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/meeting_title_edit"
-            android:textColor="@color/secondary_text"
-            android:inputType="text"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/meeting_description"
-            android:text="@string/meeting_description"
-            android:textColor="@color/primary_text"
-            android:labelFor="@+id/meeting_description_edit"
-            android:textSize="@dimen/activity_section_title_size"
-            android:textAlignment="center"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/meeting_description_edit"
-            android:textColor="@color/secondary_text"
-            android:inputType="text"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/meeting_language"
-            android:text="@string/meeting_language"
-            android:textColor="@color/primary_text"
-            android:textSize="@dimen/activity_section_title_size"
-            android:textAlignment="center"/>
-
-        <!--TODO: Language picker-->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/meeting_language_level"
-            android:text="@string/meeting_language_level"
-            android:textColor="@color/primary_text"
-            android:textSize="@dimen/activity_section_title_size"
-            android:textAlignment="center"/>
-
-        <!--TODO: Language level picker-->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/meeting_time_date"
-            android:text="@string/meeting_time_date"
-            android:textColor="@color/primary_text"
-            android:textSize="@dimen/activity_section_title_size"
-            android:textAlignment="center"/>
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <TimePicker
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/meeting_time_picker">
-            </TimePicker>
-
-            <DatePicker
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/meeting_date_picker">
-            </DatePicker>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:visibility="gone"
-            style="?android:attr/buttonBarStyle">
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:text="@string/meeting_title"
+                android:id="@+id/meeting_title"
                 android:textColor="@color/primary_text"
-                android:id="@+id/meeting_edit_ok_button"
-                android:text="@string/meeting_edit_ok_button"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:labelFor="@+id/meeting_title_edit"
+                android:textSize="@dimen/activity_section_title_size"
+                android:textAlignment="center"/>
 
-            <Button
+            <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/meeting_title_edit"
+                android:textColor="@color/secondary_text"
+                android:inputType="text"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meeting_description"
+                android:text="@string/meeting_description"
                 android:textColor="@color/primary_text"
-                android:id="@+id/meeting_edit_cancel_button"
-                android:text="@string/meeting_edit_cancel_button"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:labelFor="@+id/meeting_description_edit"
+                android:textSize="@dimen/activity_section_title_size"
+                android:textAlignment="center"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meeting_description_edit"
+                android:textColor="@color/secondary_text"
+                android:inputType="text"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meeting_language"
+                android:text="@string/meeting_language"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/activity_section_title_size"
+                android:textAlignment="center"/>
+
+            <!--TODO: Language picker-->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meeting_language_level"
+                android:text="@string/meeting_language_level"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/activity_section_title_size"
+                android:textAlignment="center"/>
+
+            <!--TODO: Language level picker-->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/meeting_time_date"
+                android:text="@string/meeting_time_date"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/activity_section_title_size"
+                android:textAlignment="center"/>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TimePicker
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/meeting_time_picker">
+                </TimePicker>
+
+                <DatePicker
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:calendarViewShown="false"
+                    android:id="@+id/meeting_date_picker">
+                </DatePicker>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                style="?android:attr/buttonBarStyle">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/primary_text"
+                    android:id="@+id/meeting_edit_ok_button"
+                    android:text="@string/meeting_edit_ok_button"
+                    style="?android:attr/buttonBarButtonStyle"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/primary_text"
+                    android:id="@+id/meeting_edit_cancel_button"
+                    android:text="@string/meeting_edit_cancel_button"
+                    style="?android:attr/buttonBarButtonStyle"/>
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

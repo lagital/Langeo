@@ -17,31 +17,43 @@ public class ActivityEditMeeting extends AppCompatActivity {
 
     private static final String TAG = "ActivityEditMeeting";
 
-    private Button mOKButton;
-    private Button mCancelButton;
-    private TimePicker mTimePicker;
-    private DatePicker mDatePicker;
-    private EditText mEditTitle;
-    private EditText mEditDescription;
+    private Button      mOKButton;
+    private Button      mCancelButton;
+    private TimePicker  mTimePicker;
+    private DatePicker  mDatePicker;
+    private EditText    mEditTitle;
+    private EditText    mEditDescription;
+    private Double      mLatitude;
+    private Double      mLongitude;
     //TODO: language level picker and language picker
 
     //public constants for pack/unpack meeting parameters:
-    public String meetingTitlePack      = "meeting_title";
-    public String meetingDescription    = "meeting_description";
-    public String meetingDateDay        = "meeting_date_day";
-    public String meetingDateMonth      = "meeting_date_month";
-    public String meetingTimeHour       = "meeting_time_hour";
-    public String meetingTimeMinute     = "meeting_time_minute";
+    public static String meetingTitle          = "meeting_title";
+    public static String meetingDescription    = "meeting_description";
+    public static String meetingDateDay        = "meeting_date_day";
+    public static String meetingDateMonth      = "meeting_date_month";
+    public static String meetingTimeHour       = "meeting_time_hour";
+    public static String meetingTimeMinute     = "meeting_time_minute";
+    public static String meetingLatitude       = "meeting_latitude";
+    public static String meetingLongitude      = "meeting_longitude";
+    public static String meetingLanguage       = "meeting_language";
+    public static String meetingLanguageLvl    = "meeting_language_lvl";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_meeting);
+
+        Intent intent = new Intent();
+        mLatitude = intent.getDoubleExtra(meetingLatitude, 0.0);
+        mLongitude = intent.getDoubleExtra(meetingLongitude, 0.0);
 
         //initialize views
         mOKButton = (Button) findViewById(R.id.meeting_edit_ok_button);
         mCancelButton = (Button) findViewById(R.id.meeting_edit_cancel_button);
         mDatePicker = (DatePicker) findViewById(R.id.meeting_date_picker);
         mTimePicker = (TimePicker) findViewById(R.id.meeting_time_picker);
+        mTimePicker.setIs24HourView(true);
         mEditTitle = (EditText) findViewById(R.id.meeting_title_edit);
         mEditDescription = (EditText) findViewById(R.id.meeting_description_edit);
 
@@ -70,15 +82,19 @@ public class ActivityEditMeeting extends AppCompatActivity {
     }
 
     private Intent packMeeting (Intent intent, String title, String description,
-                                String language, String level, Integer timeHour,
+                                String language, Integer level, Integer timeHour,
                                 Integer timeMinute, Integer dateDay, Integer dateMonth) {
 
-        intent.putExtra(meetingTitlePack,   title);
+        intent.putExtra(meetingTitle,       title);
         intent.putExtra(meetingDescription, description);
         intent.putExtra(meetingDateDay,     dateDay);
         intent.putExtra(meetingDateMonth,   dateMonth);
         intent.putExtra(meetingTimeHour,    timeHour);
         intent.putExtra(meetingTimeMinute,  timeMinute);
+        intent.putExtra(meetingLanguage,    language);
+        intent.putExtra(meetingLatitude,    mLatitude);
+        intent.putExtra(meetingLongitude,   mLongitude);
+        //intent.putExtra(meetingLanguageLvl)
         return intent;
     }
 }
